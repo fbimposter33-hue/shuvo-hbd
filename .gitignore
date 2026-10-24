@@ -10,3 +10,6 @@ Thumbs.db
 .env
 .env.*
 .vercel
+
+# build output (built by CI)
+dist/
