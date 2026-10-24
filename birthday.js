@@ -382,12 +382,13 @@ function showSecret(){
     `${SECRETS[secretIdx % SECRETS.length]}`;
   secretIdx++;
   secretToast.hidden = false;
+  void secretToast.offsetWidth;   // reflow so the pop-in transition plays
   secretToast.classList.add('show');
   clearTimeout(secretTimer);
   secretTimer = setTimeout(()=>{
     secretToast.classList.remove('show');
     setTimeout(()=>{ secretToast.hidden = true; }, 450);
-  }, 2800);
+  }, 3800);
   playChime(659, 0.5);
 }
 
@@ -836,6 +837,12 @@ function refreshRig(){
   const aimRad = Math.atan2(heartX - gripX, gripY - heartY);
   pullUX = -Math.sin(aimRad); pullUY = Math.cos(aimRad);
   nockProxy.val = REST_NOCK; applyNock();
+
+  // Measure from a clean, untransformed state: a rotated / scaled / translated
+  // rig (left over from an earlier call or the intro animation) inflates the
+  // bounding boxes and shifts the arrow away from the string.
+  gsap.set(archery, { rotation: 0, scale: 1, x: 0, y: 0 });
+  gsap.set(arrow,   { x: 0, y: 0, rotation: 0, scaleY: 1 });
 
   // Try getBoundingClientRect first (accurate when visible)
   // Fall back to pure math when element is hidden
