@@ -52,6 +52,7 @@ const setupGo   = document.getElementById('setupGo');
 
 let userName = '';
 let bdayDate  = '';
+let shareSecret = urlMsg;
 
 function buildShareURL(name, date, theme, secret){
   const base = location.origin + location.pathname;
@@ -111,6 +112,20 @@ if(isViewer){
   bdayInput.value = localStorage.getItem('hbd-date') || '';
 }
 
+function copyText(text){
+  const fallback = ()=> new Promise(res=>{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(_){}
+    ta.remove(); res();
+  });
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text).catch(fallback);
+  }
+  return fallback();
+}
+
 let linkGenerated = false;
 
 function generateLink(){
@@ -121,7 +136,8 @@ function generateLink(){
   const secret = (document.getElementById('secretInput')?.value || '').trim();
   const link   = buildShareURL(name, date, currentTheme, secret);
   // Update SECRETS for own preview
-  if(secret) SECRETS = [secret];
+  shareSecret = secret;
+  SECRETS = secret ? [secret] : DEFAULT_SECRETS;
 
   // Show preview
   const preview  = document.getElementById('linkPreview');
@@ -141,14 +157,13 @@ function generateLink(){
 
   // Change button to "Film দেখো"
   setupGo.textContent = 'Film দেখো 🎬';
-  setupGo.onclick = startFilm;
 
   previewWA.onclick = ()=>{
     const msg = `🎂 ${name}-এর জন্য একটা বিশেষ Birthday Film! 🌸\n${link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
   };
   previewCopy.onclick = ()=>{
-    navigator.clipboard.writeText(link).then(()=>{
+    copyText(link).then(()=>{
       previewCopy.textContent = '✅ কপি!';
       setTimeout(()=>{ previewCopy.textContent = 'কপি 🔗'; }, 2000);
     });
@@ -161,12 +176,24 @@ function startFilm(){
 }
 
 setupGo.addEventListener('click', ()=>{
-  if(window._viewerAutoStart){
-    // Viewer mode: skip link generation, go straight to film
+  if(window._viewerAutoStart || linkGenerated){
+    // Viewer mode / link already made: go straight to the film
     startFilm();
   } else {
     generateLink();
   }
+});
+['input','change'].forEach(ev=>{
+  [nameInput, bdayInput, document.getElementById('secretInput')].forEach(el=>{
+    el && el.addEventListener(ev, ()=>{
+      if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
+    });
+  });
+});
+document.querySelectorAll('.theme-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
+  });
 });
 nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') bdayInput.focus(); });
 bdayInput.addEventListener('keydown', e=>{ if(e.key==='Enter') generateLink(); });
@@ -177,11 +204,13 @@ bdayInput.addEventListener('keydown', e=>{ if(e.key==='Enter') generateLink(); }
 function showCountdown(dateStr){
   const banner = document.getElementById('countdownBanner');
   const cdDays = document.getElementById('cdDays');
-  const today  = new Date();
+  const now    = new Date();
+  const today  = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const parts  = dateStr.split('-');
+  if(parts.length < 3 || isNaN(+parts[1]) || isNaN(+parts[2])) return;
   let next = new Date(today.getFullYear(), +parts[1]-1, +parts[2]);
-  if(next <= today) next.setFullYear(today.getFullYear()+1);
-  const diff = Math.ceil((next - today)/(1000*60*60*24));
+  if(next < today) next = new Date(today.getFullYear()+1, +parts[1]-1, +parts[2]);
+  const diff = Math.round((next - today)/(1000*60*60*24));
   if(diff === 0){
     banner.querySelector('span').textContent = `🎉 আজই ${userName}-এর জন্মদিন! Happy Birthday!`;
   } else {
@@ -198,6 +227,7 @@ let audioCtx = null;
 
 function getACtx(){
   if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
   return audioCtx;
 }
 
@@ -362,9 +392,12 @@ function showSecret(){
 }
 
 /* We attach the tap listener to the tree canvas after Act 4 starts */
+let secretTapBound = false;
 function enableSecretTap(){
   const treeCanvas = document.getElementById('tree');
   treeCanvas.style.cursor = 'pointer';
+  if(secretTapBound) return;
+  secretTapBound = true;
   treeCanvas.addEventListener('click', showSecret);
 }
 
@@ -384,14 +417,14 @@ shareFab.addEventListener('click',()=>{
 shareClose.addEventListener('click',()=>{ sharePanel.hidden = true; });
 
 shareWA.addEventListener('click',()=>{
-  const link = buildShareURL(userName, bdayDate, currentTheme);
+  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret);
   const msg = `🎂 ${userName}-এর জন্য একটা বিশেষ Birthday Film! 🌸\n${link}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 });
 
 shareCopy.addEventListener('click',()=>{
-  const link = buildShareURL(userName, bdayDate, currentTheme);
-  navigator.clipboard.writeText(link).then(()=>{
+  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret);
+  copyText(link).then(()=>{
     shareCopy.textContent = '✅ কপি হয়েছে!';
     setTimeout(()=>{ shareCopy.textContent = 'লিঙ্ক কপি 🔗'; }, 2000);
   });
@@ -501,8 +534,8 @@ function heartShape(c, cx, cy, w, h){
   c.moveTo(cx, cy + h*0.62);
   c.bezierCurveTo(cx - w*0.08, cy + h*0.38, x, cy + h*0.22, x, cy);
   c.bezierCurveTo(x, cy - h*0.3, cx - r*0.1, cy - h*0.42, cx, cy - h*0.14);
-  c.bezierCurveTo(cx + r*0.1, cy - h*0.42, cx + w, cy - h*0.3, cx + w, cy);
-  c.bezierCurveTo(cx + w, cy + h*0.22, cx + w*0.08*2, cy + h*0.38, cx, cy + h*0.62);
+  c.bezierCurveTo(cx + r*0.1, cy - h*0.42, cx + w/2, cy - h*0.3, cx + w/2, cy);
+  c.bezierCurveTo(cx + w/2, cy + h*0.22, cx + w*0.08, cy + h*0.38, cx, cy + h*0.62);
   c.closePath();
 }
 
@@ -1063,6 +1096,8 @@ function resize(){
 let resizeRAF = 0;
 window.addEventListener('resize', () => { if (resizeRAF) return; resizeRAF = requestAnimationFrame(() => { resizeRAF = 0; resize(); }); });
 
+if(isViewer) personalise(urlName, urlDate);
+
 resize();
 
 if (reduceMotion){
@@ -1072,9 +1107,8 @@ if (reduceMotion){
   document.fonts && document.fonts.ready.then(() => {
     resize();
     if(window._viewerAutoStart){
-      // Viewer: auto start film directly
+      // Viewer: auto start film directly (startFilm already calls enter once)
       startFilm();
-      setTimeout(enter, 600);
     }
   });
   replay.addEventListener('click', resetAll);
