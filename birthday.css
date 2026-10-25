@@ -611,7 +611,7 @@ body{
 
 /* --- CONFETTI CANVAS -------------------------------------- */
 .confetti-canvas{
-  position:fixed; inset:0; z-index:11;
+  position:fixed; inset:0; z-index:260;
   pointer-events:none; width:100%; height:100%;
 }
 
@@ -682,3 +682,72 @@ html.viewer-mode .setup{
   pointer-events: none;
 }
 
+
+
+/* --- LOCK-UNTIL-DATE CHECKBOX ------------------------------ */
+.setup__check{
+  display:flex; align-items:flex-start; gap:8px; margin-top:10px;
+  text-align:left; cursor:pointer;
+  font-family:"Cormorant Garamond",Georgia,serif; font-size:14px; color:#9a4560;
+}
+.setup__check input{ margin-top:3px; accent-color:#d94070; flex:none; }
+
+/* --- LOCK SCREEN ------------------------------------------- */
+.lock{
+  position:fixed; inset:0; z-index:400;
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  background:radial-gradient(135% 110% at 50% 20%, #fff6ee 0%, #f9dfd4 55%, #f0c4b8 100%);
+}
+.lock[hidden]{ display:none; }
+.lock__card{ text-align:center; max-width:420px; font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif; color:#8a3555; }
+.lock__icon{ font-size:64px; line-height:1; margin:0 0 14px; }
+.lock__title{ font-size:clamp(26px,7vw,36px); font-weight:700; margin:0 0 8px; }
+.lock__sub{ font-size:18px; margin:0 0 22px; opacity:.85; }
+.lock__time{ font-size:clamp(20px,5.6vw,28px); font-weight:700; color:#d43060; margin:0; line-height:1.5; }
+
+/* --- CAKE -------------------------------------------------- */
+.cake-open{
+  position:absolute; left:20px; bottom:18px; z-index:7;
+  padding:9px 15px; border-radius:999px;
+  font:600 14px/1 "Cormorant Garamond","Hind Siliguri",Georgia,serif; color:#8a4a5a;
+  background:rgba(255,248,242,.78); border:1px solid rgba(150,60,80,.18);
+  box-shadow:0 6px 20px -8px rgba(120,20,50,.4);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  cursor:pointer; opacity:0; transform:translateY(8px);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.cake-open[hidden]{ display:none; }
+.cake-open.is-shown{ opacity:1; transform:translateY(0); }
+
+.cake-overlay{
+  position:fixed; inset:0; z-index:250;
+  display:flex; align-items:center; justify-content:center; padding:16px;
+  background:rgba(40,10,25,.62);
+  opacity:0; transition:opacity .3s ease;
+}
+.cake-overlay[hidden]{ display:none; }
+.cake-overlay.show{ opacity:1; }
+.cake-box{
+  position:relative; width:min(92vw,380px); padding:26px 20px 22px; text-align:center;
+  background:rgba(255,250,246,.97); border-radius:26px;
+  box-shadow:0 24px 70px -12px rgba(168,40,80,.5);
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif; color:#8a3555;
+}
+.cake-title{ font-size:clamp(22px,6vw,28px); font-weight:700; margin:0 0 6px; line-height:1.35; }
+.cake-svg{ width:100%; height:auto; display:block; margin:0 auto; overflow:visible; }
+.cake-hint{ font-size:15px; margin:4px 0 12px; opacity:.8; }
+.cake-blow{
+  padding:12px 28px; border:none; border-radius:14px; cursor:pointer;
+  font:700 18px/1 "Cormorant Garamond","Hind Siliguri",Georgia,serif; color:#fff;
+  background:linear-gradient(135deg,#e8527a,#c41f52);
+  box-shadow:0 8px 24px -6px rgba(180,30,70,.4);
+}
+.cake-blow[hidden]{ display:none; }
+.cake-close{
+  position:absolute; top:10px; right:12px; width:34px; height:34px; border-radius:50%;
+  border:none; cursor:pointer; font-size:15px; color:#666; background:rgba(240,240,240,.9);
+}
+.candle{ cursor:pointer; }
+.flame{ transform-box:fill-box; transform-origin:50% 100%; animation:flame-flick .45s ease-in-out infinite alternate; transition:opacity .35s ease, transform .35s ease; }
+.candle.out .flame{ opacity:0; transform:scale(.2); animation:none; }
+@keyframes flame-flick{ from{ transform:scale(1,1) rotate(-3deg); } to{ transform:scale(.92,1.08) rotate(3deg); } }
