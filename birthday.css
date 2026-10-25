@@ -509,7 +509,7 @@ body{
 .setup__input[type="date"]{ color:#6e3040; cursor:pointer; }
 
 .theme-row{
-  display:flex; gap:12px; justify-content:center;
+  display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
   margin-top:4px;
 }
 .theme-btn{
@@ -632,6 +632,26 @@ body{
   --heart-hi:#fff3d4; --heart-mid:#f4a626; --heart-deep:#c47a00; --heart-dark:#8a5500;
   --rose-deep:#8a5500; --rose:#c47a00; --rose-lift:#f4a626; --wine:#5a3600;
 }
+
+:root[data-theme="green"]{
+  --heart-hi:#d9ffe6; --heart-mid:#3fcf7a; --heart-deep:#16883f; --heart-dark:#0b5a28;
+  --rose-deep:#0f6a30; --rose:#1f9a4d; --rose-lift:#52d88a; --wine:#07401c;
+}
+:root[data-theme="night"]{
+  --heart-hi:#e0e4ff; --heart-mid:#7b86ff; --heart-deep:#3a3fb8; --heart-dark:#1f2273;
+  --rose-deep:#1c1f70; --rose:#3a40c0; --rose-lift:#7f89ff; --wine:#10124a;
+}
+
+/* --- MUSIC BUTTON ----------------------------------------- */
+.music-btn{
+  position:fixed; top:64px; right:14px; z-index:97;
+  width:40px; height:40px; border-radius:50%;
+  border:none; cursor:pointer; font-size:18px; line-height:1;
+  background:rgba(255,248,244,.85);
+  backdrop-filter:blur(6px);
+  box-shadow:0 6px 18px -6px rgba(120,20,50,.35);
+}
+.music-btn[hidden]{ display:none; }
 
 /* --- LINK PREVIEW BOX ------------------------------------- */
 .link-box{
