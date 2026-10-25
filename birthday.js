@@ -27,6 +27,63 @@ const urlLock  = params.get('lock') === '1';
 const isViewer = !!urlName;   // true = received a link, skip setup
 
 /* ============================================================
+   LANGUAGE (film text + lock screen): bn (default) or en
+   ============================================================ */
+let lang = isViewer
+  ? (params.get('lang') === 'en' ? 'en' : 'bn')
+  : (()=>{ try{ return localStorage.getItem('hbd-lang') === 'en' ? 'en' : 'bn'; }catch(_){ return 'bn'; } })();
+
+const BN_DIGITS = '০১২৩৪৫৬৭৮৯';
+const toBn = (n)=> String(n).replace(/\d/g, d => BN_DIGITS[+d]);
+
+const I18N = {
+  bn: {
+    eyebrow:   n => `তোমার জন্য ছোট্ট একটা উপহার, ${n}`,
+    hint:      'টানো আর ছেড়ে দাও',
+    kEyebrow:  'একটা ইচ্ছে করো…',
+    line1:     'শুভ',
+    line2:     'জন্মদিন',
+    kSub:      n => `${n}-এর জন্য — তুমি উদযাপনের যোগ্য`,
+    wEyebrow:  'আর… একে স্মরণীয় করো',
+    wHero:     n => `শুভ জন্মদিন, ${n}!`,
+    wSub:      f => f ? `ফুলের মতো সুন্দর একটা বছর হোক — ভালোবাসায়, ${f}` : 'ফুলের মতো সুন্দর একটা বছর হোক',
+    replay:    'আবার',
+    share:     (n, l) => `🎂 ${n}-এর জন্য একটা বিশেষ Birthday Film! 🌸\n${l}`,
+    lockTitle: n => `${n}, এখনও সময় হয়নি…`,
+    lockSub:   'তোমার জন্য একটা সুন্দর উপহার অপেক্ষা করছে',
+    lockFoot:  'সময় হলেই নিজে থেকে খুলে যাবে ✨',
+    units:     ['দিন', 'ঘণ্টা', 'মিনিট', 'সেকেন্ড'],
+    num:       toBn,
+  },
+  en: {
+    eyebrow:   n => `a little something, for ${n}`,
+    hint:      'pull & release',
+    kEyebrow:  'make a wish…',
+    line1:     'Happy',
+    line2:     'Birthday',
+    kSub:      n => `to ${n} — someone worth celebrating`,
+    wEyebrow:  'and… make it count',
+    wHero:     n => `Happy Birthday, ${n}!`,
+    wSub:      f => f ? `here’s to a year that blooms — with love, ${f}` : 'here’s to a year that blooms',
+    replay:    'Again',
+    share:     (n, l) => `🎂 A special birthday film for ${n}! 🌸\n${l}`,
+    lockTitle: n => `${n}, not just yet…`,
+    lockSub:   'A little surprise is waiting for you',
+    lockFoot:  'It will open by itself when the time comes ✨',
+    units:     ['days', 'hours', 'min', 'sec'],
+    num:       n => String(n),
+  },
+};
+
+function setLang(l){
+  lang = (l === 'en') ? 'en' : 'bn';
+  document.documentElement.setAttribute('data-lang', lang);
+  document.documentElement.setAttribute('lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+}
+setLang(lang);
+
+/* ============================================================
    THEME SYSTEM
    ============================================================ */
 let currentTheme = params.get('theme') || localStorage.getItem('hbd-theme') || 'pink';
@@ -67,15 +124,14 @@ function buildShareURL(name, date, theme, secret, from, lock){
   if(secret) p.set('msg', secret);
   if(from)   p.set('from', from);
   if(lock && date) p.set('lock', '1');
+  if(lang === 'en') p.set('lang', 'en');
   return base + '?' + p.toString();
 }
 
 function personalise(name, date){
   userName = name || 'তুমি';
   bdayDate  = date || '';
-  document.getElementById('wHero').textContent    = `Happy Birthday, ${userName}!`;
-  document.getElementById('kSub').textContent     = `to ${userName} — someone worth celebrating`;
-  document.getElementById('eyebrow').textContent  = `a little something, for ${userName}`;
+  applyFilmText();
   // secret message: URL msg > input field > default
   const secretVal = urlMsg
     || (document.getElementById('secretInput')?.value || '').trim()
@@ -84,12 +140,27 @@ function personalise(name, date){
   if(urlMsg || (document.getElementById('secretInput')?.value||'').trim()){
     SECRETS = [secretVal];
   }
-  const fromVal = urlFrom || (document.getElementById('fromInput')?.value || '').trim();
-  const subEl = document.getElementById('wSub');
-  if(subEl) subEl.textContent = fromVal
-    ? `here\u2019s to a year that blooms \u2014 with love, ${fromVal}`
-    : 'here\u2019s to a year that blooms';
   if(bdayDate) showCountdown(bdayDate);
+}
+
+// Fill every piece of film text in the chosen language and re-split the headline.
+function applyFilmText(){
+  const d = I18N[lang];
+  const fromVal = urlFrom || (document.getElementById('fromInput')?.value || '').trim();
+  const set = (id, txt)=>{ const el = document.getElementById(id); if(el) el.textContent = txt; };
+  set('eyebrow',   d.eyebrow(userName));
+  set('hint',      d.hint);
+  set('kEyebrow',  d.kEyebrow);
+  set('kSub',      d.kSub(userName));
+  set('wEyebrow',  d.wEyebrow);
+  set('wHero',     d.wHero(userName));
+  set('wSub',      d.wSub(fromVal));
+  set('replayLabel', d.replay);
+  set('wLine1',    d.line1);
+  set('wLine2',    d.line2);
+  line1Chars = splitWord(document.getElementById('wLine1'));
+  line2Chars = splitWord(document.getElementById('wLine2'));
+  kChars = [...line1Chars, ...line2Chars];
 }
 
 function hideSetup(){
@@ -175,7 +246,7 @@ function generateLink(){
   setupGo.textContent = 'Film দেখো 🎬';
 
   previewWA.onclick = ()=>{
-    const msg = `🎂 ${name}-এর জন্য একটা বিশেষ Birthday Film! 🌸\n${link}`;
+    const msg = I18N[lang].share(name, link);
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
   };
   previewCopy.onclick = ()=>{
@@ -201,6 +272,13 @@ setupGo.addEventListener('click', ()=>{
   } else {
     generateLink();
   }
+});
+document.querySelectorAll('.lang-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    setLang(btn.dataset.lang);
+    try{ localStorage.setItem('hbd-lang', lang); }catch(_){}
+    if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
+  });
 });
 ['input','change'].forEach(ev=>{
   [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput'), document.getElementById('lockInput')].forEach(el=>{
@@ -549,7 +627,7 @@ shareClose.addEventListener('click',()=>{ sharePanel.hidden = true; });
 
 shareWA.addEventListener('click',()=>{
   const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret, shareFrom, shareLock);
-  const msg = `🎂 ${userName}-এর জন্য একটা বিশেষ Birthday Film! 🌸\n${link}`;
+  const msg = I18N[lang].share(userName, link);
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 });
 
@@ -921,7 +999,8 @@ function drawFinal(){
 }
 
 function splitWord(el){
-  const chars = [...el.textContent];
+  // Bengali conjuncts break if split per code point → animate whole words there
+  const chars = (lang === 'bn') ? [el.textContent] : [...el.textContent];
   el.textContent = '';
   return chars.map((c) => {
     const s = document.createElement('span');
@@ -931,9 +1010,9 @@ function splitWord(el){
     return s;
   });
 }
-const line1Chars = splitWord($('wLine1'));
-const line2Chars = splitWord($('wLine2'));
-const kChars = [...line1Chars, ...line2Chars];
+let line1Chars = splitWord($('wLine1'));
+let line2Chars = splitWord($('wLine2'));
+let kChars = [...line1Chars, ...line2Chars];
 
 function buildMotes(){
   motes.innerHTML = '';
@@ -1216,10 +1295,15 @@ function lockRemaining(){
 }
 let lockTimer = 0;
 function showLock(onOpen){
+  const d = I18N[lang];
   const el = document.getElementById('lockScreen');
-  const timeEl = document.getElementById('lockTime');
-  document.getElementById('lockTitle').textContent = `${userName}, এখনও সময় হয়নি…`;
+  const q = (id)=> document.getElementById(id);
+  q('lockTitle').textContent = d.lockTitle(userName);
+  q('lockSub').textContent   = d.lockSub;
+  q('lockFoot').textContent  = d.lockFoot;
+  ['lkDl','lkHl','lkMl','lkSl'].forEach((id, i)=>{ q(id).textContent = d.units[i]; });
   el.hidden = false;
+  const pad = (n)=> n < 10 ? '0' + n : String(n);
   const tick = ()=>{
     const ms = lockRemaining();
     if(ms <= 0){
@@ -1229,8 +1313,11 @@ function showLock(onOpen){
       return;
     }
     const t = Math.floor(ms / 1000);
-    const d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
-    timeEl.textContent = `${d} দিন ${h} ঘণ্টা ${m} মিনিট ${s} সেকেন্ড`;
+    const days = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), sec = t % 60;
+    q('lkD').textContent = d.num(days);
+    q('lkH').textContent = d.num(pad(h));
+    q('lkM').textContent = d.num(pad(m));
+    q('lkS').textContent = d.num(pad(sec));
   };
   clearInterval(lockTimer);
   tick();
@@ -1349,6 +1436,78 @@ if (reduceMotion){
     }
   });
   replay.addEventListener('click', resetAll);
+}
+
+/* ============================================================
+   DEVELOPER CREDIT + PROFILE CARD
+   Fill in DEV.links to show buttons (leave empty to hide them).
+   Optional profile photo: put it at  public/developer.jpg
+   ============================================================ */
+const DEV = {
+  name:   'Shuvo Ahmed',
+  role:   'Developer',
+  bubble: 'এই উপহারটা তৈরি করেছেন Shuvo Ahmed 💌',
+  links: [
+    // { label: '💬 WhatsApp', url: 'https://wa.me/8801XXXXXXXXX' },
+    // { label: 'Facebook',    url: 'https://facebook.com/your.profile' },
+  ],
+};
+
+(function initDev(){
+  const modal   = document.getElementById('devModal');
+  const credit  = document.getElementById('devCredit');
+  const closeBt = document.getElementById('devClose');
+  const img     = document.getElementById('devImg');
+  const initial = document.getElementById('devInitial');
+  document.getElementById('devName').textContent   = DEV.name;
+  document.getElementById('devRole').textContent   = DEV.role;
+  document.getElementById('devBubble').textContent = DEV.bubble;
+  initial.textContent = (DEV.name.trim().charAt(0) || 'S').toUpperCase();
+  const linksEl = document.getElementById('devLinks');
+  DEV.links.forEach(l=>{
+    const a = document.createElement('a');
+    a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = l.label;
+    linksEl.appendChild(a);
+  });
+  img.onload  = ()=>{ img.hidden = false; initial.hidden = true; };
+  img.onerror = ()=>{ img.hidden = true; };
+  img.src = import.meta.env.BASE_URL + 'developer.jpg';
+
+  const open  = ()=>{ modal.hidden = false; playChime(587, 0.35); };
+  const close = ()=>{ modal.hidden = true; };
+  credit.addEventListener('click', open);
+  closeBt.addEventListener('click', close);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) close(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && !modal.hidden) close(); });
+})();
+
+/* ============================================================
+   PWA — install button + service worker
+   ============================================================ */
+let deferredInstall = null;
+const installBtns = [document.getElementById('installBtn'), document.getElementById('devInstall')];
+function setInstallVisible(v){ installBtns.forEach(b=>{ if(b) b.hidden = !v; }); }
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstall = e;
+  setInstallVisible(true);
+});
+window.addEventListener('appinstalled', ()=>{ deferredInstall = null; setInstallVisible(false); });
+installBtns.forEach(b=>{
+  if(!b) return;
+  b.addEventListener('click', async ()=>{
+    if(!deferredInstall) return;
+    deferredInstall.prompt();
+    try{ await deferredInstall.userChoice; }catch(_){}
+    deferredInstall = null;
+    setInstallVisible(false);
+  });
+});
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js').catch(()=>{});
+  });
 }
 
 if (isRecord){
