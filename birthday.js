@@ -23,6 +23,7 @@ const urlName  = params.get('to')   || '';
 const urlDate  = params.get('date') || '';
 const urlMsg   = params.get('msg')  || '';
 const urlFrom  = params.get('from') || '';
+const urlLock  = params.get('lock') === '1';
 const isViewer = !!urlName;   // true = received a link, skip setup
 
 /* ============================================================
@@ -55,8 +56,9 @@ let userName = '';
 let bdayDate  = '';
 let shareSecret = urlMsg;
 let shareFrom   = urlFrom;
+let shareLock   = urlLock;
 
-function buildShareURL(name, date, theme, secret, from){
+function buildShareURL(name, date, theme, secret, from, lock){
   const base = location.origin + location.pathname;
   const p = new URLSearchParams();
   p.set('to', name);
@@ -64,6 +66,7 @@ function buildShareURL(name, date, theme, secret, from){
   if(theme && theme !== 'pink') p.set('theme', theme);
   if(secret) p.set('msg', secret);
   if(from)   p.set('from', from);
+  if(lock && date) p.set('lock', '1');
   return base + '?' + p.toString();
 }
 
@@ -144,7 +147,9 @@ function generateLink(){
   nameInput.style.border='';
   const date   = bdayInput.value;
   const secret = (document.getElementById('secretInput')?.value || '').trim();
-  const link   = buildShareURL(name, date, currentTheme, secret, (document.getElementById('fromInput')?.value || '').trim());
+  const lockOn = !!document.getElementById('lockInput')?.checked;
+  shareLock = lockOn;
+  const link   = buildShareURL(name, date, currentTheme, secret, (document.getElementById('fromInput')?.value || '').trim(), lockOn);
   // Update SECRETS for own preview
   shareSecret = secret;
   shareFrom = (document.getElementById('fromInput')?.value || '').trim();
@@ -181,7 +186,10 @@ function generateLink(){
   };
 }
 
+let filmStartedOnce = false;
 function startFilm(){
+  if(filmStartedOnce) return;
+  filmStartedOnce = true;
   hideSetup();
   setTimeout(enter, 600);
 }
@@ -195,7 +203,7 @@ setupGo.addEventListener('click', ()=>{
   }
 });
 ['input','change'].forEach(ev=>{
-  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput')].forEach(el=>{
+  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput'), document.getElementById('lockInput')].forEach(el=>{
     el && el.addEventListener(ev, ()=>{
       if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
     });
@@ -540,13 +548,13 @@ shareFab.addEventListener('click',()=>{
 shareClose.addEventListener('click',()=>{ sharePanel.hidden = true; });
 
 shareWA.addEventListener('click',()=>{
-  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret, shareFrom);
+  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret, shareFrom, shareLock);
   const msg = `🎂 ${userName}-এর জন্য একটা বিশেষ Birthday Film! 🌸\n${link}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 });
 
 shareCopy.addEventListener('click',()=>{
-  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret, shareFrom);
+  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret, shareFrom, shareLock);
   copyText(link).then(()=>{
     shareCopy.textContent = '✅ কপি হয়েছে!';
     setTimeout(()=>{ shareCopy.textContent = 'লিঙ্ক কপি 🔗'; }, 2000);
@@ -1191,13 +1199,107 @@ function enter(){
   }));
 }
 
+/* ============================================================
+   LOCK UNTIL DATE (soft lock — a client-side surprise, not security)
+   ============================================================ */
+function parseLocalDate(str){
+  const p = (str || '').split('-');
+  if(p.length < 3) return null;
+  const d = new Date(+p[0], +p[1] - 1, +p[2]);
+  return isNaN(d.getTime()) ? null : d;
+}
+function lockRemaining(){
+  if(!urlLock || !urlDate) return 0;
+  const d = parseLocalDate(urlDate);
+  if(!d) return 0;
+  return Math.max(0, d.getTime() - Date.now());
+}
+let lockTimer = 0;
+function showLock(onOpen){
+  const el = document.getElementById('lockScreen');
+  const timeEl = document.getElementById('lockTime');
+  document.getElementById('lockTitle').textContent = `${userName}, এখনও সময় হয়নি…`;
+  el.hidden = false;
+  const tick = ()=>{
+    const ms = lockRemaining();
+    if(ms <= 0){
+      clearInterval(lockTimer);
+      el.hidden = true;
+      if(onOpen) onOpen();
+      return;
+    }
+    const t = Math.floor(ms / 1000);
+    const d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+    timeEl.textContent = `${d} দিন ${h} ঘণ্টা ${m} মিনিট ${s} সেকেন্ড`;
+  };
+  clearInterval(lockTimer);
+  tick();
+  lockTimer = setInterval(tick, 1000);
+}
+
+/* ============================================================
+   CAKE — blow out the candles
+   ============================================================ */
+const cakeBtn     = document.getElementById('cakeBtn');
+const cakeOverlay = document.getElementById('cakeOverlay');
+const cakeTitle   = document.getElementById('cakeTitle');
+const cakeHint    = document.getElementById('cakeHint');
+const cakeBlow    = document.getElementById('cakeBlow');
+const cakeClose   = document.getElementById('cakeClose');
+const candleEls   = [...document.querySelectorAll('#cakeSvg .candle')];
+let cakeDone = false, cakeHideTimer = 0;
+
+const litCandles = ()=> candleEls.filter(c => !c.classList.contains('out'));
+
+function checkCake(){
+  if(cakeDone || litCandles().length) return;
+  cakeDone = true;
+  cakeTitle.textContent = `🎉 Happy Birthday, ${userName}!`;
+  cakeHint.textContent = 'সব মোমবাতি নিভে গেছে — এবার একটা ইচ্ছে করো ✨';
+  cakeBlow.hidden = true;
+  playPiano(); launchConfetti(); launchFireworks();
+}
+function blowCandle(c){
+  if(c.classList.contains('out')) return;
+  c.classList.add('out');
+  playChime(300 + Math.random() * 200, 0.25);
+  checkCake();
+}
+function openCake(){
+  clearTimeout(cakeHideTimer);
+  cakeDone = false;
+  candleEls.forEach(c => c.classList.remove('out'));
+  cakeTitle.textContent = 'মোমবাতিতে ফুঁ দাও 🎂';
+  cakeHint.textContent = 'মোমবাতিতে ট্যাপ করো, নয়তো নিচের বাটন চাপো';
+  cakeBlow.hidden = false;
+  cakeOverlay.hidden = false;
+  void cakeOverlay.offsetWidth;
+  cakeOverlay.classList.add('show');
+  playChime(523, 0.4);
+}
+function closeCake(instant){
+  cakeOverlay.classList.remove('show');
+  clearTimeout(cakeHideTimer);
+  if(instant){ cakeOverlay.hidden = true; return; }
+  cakeHideTimer = setTimeout(()=>{ cakeOverlay.hidden = true; }, 300);
+}
+cakeBtn.addEventListener('click', openCake);
+cakeClose.addEventListener('click', ()=> closeCake());
+cakeBlow.addEventListener('click', ()=>{
+  litCandles().forEach((c, i)=> setTimeout(()=> blowCandle(c), i * 220));
+});
+candleEls.forEach(c => c.addEventListener('click', ()=> blowCandle(c)));
+
 function armReplay(){
+  cakeBtn.hidden = false;
+  requestAnimationFrame(() => cakeBtn.classList.add('is-shown'));
   replay.hidden = false;
   requestAnimationFrame(() => replay.classList.add('is-shown'));
 }
 
 function resetAll(){
   treeStop(); showWish(false);
+  cakeBtn.classList.remove('is-shown'); cakeBtn.hidden = true; closeCake(true);
   clearInterval(fwTimer); sparks = [];
   window.bdayDone = false; replayArmed = false; confettiFired = false;
   replay.classList.remove('is-shown'); replay.hidden = true;
@@ -1228,7 +1330,10 @@ function resize(){
 let resizeRAF = 0;
 window.addEventListener('resize', () => { if (resizeRAF) return; resizeRAF = requestAnimationFrame(() => { resizeRAF = 0; resize(); }); });
 
-if(isViewer) personalise(urlName, urlDate);
+if(isViewer){
+  personalise(urlName, urlDate);
+  if(lockRemaining() > 0) showLock(()=>{ if(!reduceMotion) startFilm(); });
+}
 
 resize();
 
@@ -1238,7 +1343,7 @@ if (reduceMotion){
   buildMotes();
   document.fonts && document.fonts.ready.then(() => {
     resize();
-    if(window._viewerAutoStart){
+    if(window._viewerAutoStart && lockRemaining() <= 0){
       // Viewer: auto start film directly (startFilm already calls enter once)
       startFilm();
     }
