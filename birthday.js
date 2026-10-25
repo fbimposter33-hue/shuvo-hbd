@@ -22,6 +22,7 @@ const params   = new URLSearchParams(location.search);
 const urlName  = params.get('to')   || '';
 const urlDate  = params.get('date') || '';
 const urlMsg   = params.get('msg')  || '';
+const urlFrom  = params.get('from') || '';
 const isViewer = !!urlName;   // true = received a link, skip setup
 
 /* ============================================================
@@ -53,14 +54,16 @@ const setupGo   = document.getElementById('setupGo');
 let userName = '';
 let bdayDate  = '';
 let shareSecret = urlMsg;
+let shareFrom   = urlFrom;
 
-function buildShareURL(name, date, theme, secret){
+function buildShareURL(name, date, theme, secret, from){
   const base = location.origin + location.pathname;
   const p = new URLSearchParams();
   p.set('to', name);
   if(date)   p.set('date', date);
   if(theme && theme !== 'pink') p.set('theme', theme);
   if(secret) p.set('msg', secret);
+  if(from)   p.set('from', from);
   return base + '?' + p.toString();
 }
 
@@ -78,6 +81,11 @@ function personalise(name, date){
   if(urlMsg || (document.getElementById('secretInput')?.value||'').trim()){
     SECRETS = [secretVal];
   }
+  const fromVal = urlFrom || (document.getElementById('fromInput')?.value || '').trim();
+  const subEl = document.getElementById('wSub');
+  if(subEl) subEl.textContent = fromVal
+    ? `here\u2019s to a year that blooms \u2014 with love, ${fromVal}`
+    : 'here\u2019s to a year that blooms';
   if(bdayDate) showCountdown(bdayDate);
 }
 
@@ -104,6 +112,8 @@ if(isViewer){
   if(urlDate) bdayInput.value = urlDate;
   const si = document.getElementById('secretInput');
   if(si && urlMsg) si.value = urlMsg;
+  const fi = document.getElementById('fromInput');
+  if(fi && urlFrom) fi.value = urlFrom;
   // Auto-trigger after fonts + layout ready
   window._viewerAutoStart = true;
 } else {
@@ -134,9 +144,10 @@ function generateLink(){
   nameInput.style.border='';
   const date   = bdayInput.value;
   const secret = (document.getElementById('secretInput')?.value || '').trim();
-  const link   = buildShareURL(name, date, currentTheme, secret);
+  const link   = buildShareURL(name, date, currentTheme, secret, (document.getElementById('fromInput')?.value || '').trim());
   // Update SECRETS for own preview
   shareSecret = secret;
+  shareFrom = (document.getElementById('fromInput')?.value || '').trim();
   SECRETS = secret ? [secret] : DEFAULT_SECRETS;
 
   // Show preview
@@ -184,7 +195,7 @@ setupGo.addEventListener('click', ()=>{
   }
 });
 ['input','change'].forEach(ev=>{
-  [nameInput, bdayInput, document.getElementById('secretInput')].forEach(el=>{
+  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput')].forEach(el=>{
     el && el.addEventListener(ev, ()=>{
       if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
     });
@@ -296,12 +307,80 @@ function playPiano(){
 }
 
 /* ============================================================
+   4b. BACKGROUND MUSIC — synthesised "Happy Birthday" (no audio file)
+   ============================================================ */
+const musicBtn = document.getElementById('musicBtn');
+const MUSIC_VOL = 0.16;
+let musicGain = null, musicOn = true, musicStarted = false, musicTimer = 0;
+// [frequency Hz, beats] — key of C
+const HB_TUNE = [
+  [392,.75],[392,.25],[440,1],[392,1],[523.25,1],[493.88,2],
+  [392,.75],[392,.25],[440,1],[392,1],[587.33,1],[523.25,2],
+  [392,.75],[392,.25],[783.99,1],[659.25,1],[523.25,1],[493.88,1],[440,2],
+  [698.46,.75],[698.46,.25],[659.25,1],[523.25,1],[587.33,1],[523.25,2],
+];
+
+function musicNote(ac, freq, t, dur){
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.5, t + 0.03);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  g.connect(musicGain);
+  [['sine', freq, 1], ['triangle', freq / 2, 0.35]].forEach(([type, f, mul])=>{
+    const o = ac.createOscillator();
+    const og = ac.createGain();
+    o.type = type; o.frequency.value = f; og.gain.value = mul;
+    o.connect(og); og.connect(g);
+    o.start(t); o.stop(t + dur + 0.05);
+  });
+}
+
+function scheduleMusic(){
+  if(!musicStarted) return;
+  try{
+    const ac = getACtx();
+    const beat = 0.55, t0 = ac.currentTime + 0.1;
+    let t = t0;
+    HB_TUNE.forEach(([f, b])=>{
+      musicNote(ac, f, t, b * beat * 1.7);
+      t += b * beat;
+    });
+    musicTimer = setTimeout(scheduleMusic, ((t - t0) + 3) * 1000);
+  } catch(_){}
+}
+
+function startMusic(){
+  if(musicStarted) return;
+  try{
+    const ac = getACtx();
+    musicGain = ac.createGain();
+    musicGain.gain.value = musicOn ? MUSIC_VOL : 0;
+    musicGain.connect(ac.destination);
+    musicStarted = true;
+    musicBtn.hidden = false;
+    scheduleMusic();
+  } catch(_){}
+}
+
+musicBtn.addEventListener('click', ()=>{
+  musicOn = !musicOn;
+  musicBtn.textContent = musicOn ? '\u{1F50A}' : '\u{1F507}';
+  if(musicGain){
+    try{ musicGain.gain.setTargetAtTime(musicOn ? MUSIC_VOL : 0, getACtx().currentTime, 0.05); }
+    catch(_){ musicGain.gain.value = musicOn ? MUSIC_VOL : 0; }
+  }
+});
+
+/* ============================================================
    5. CONFETTI ENGINE
    ============================================================ */
 const confCanvas = document.getElementById('confettiCanvas');
 const confCtx    = confCanvas.getContext('2d');
 let confetti     = [];
 let confRAF      = 0;
+let confRunning  = false;
+let sparks       = [];
+let fwTimer      = 0;
 
 function resizeConf(){
   confCanvas.width  = window.innerWidth;
@@ -349,14 +428,57 @@ function drawConf(){
     confCtx.fillRect(-c.w/2,-c.h/2,c.w,c.h);
     confCtx.restore();
   }
+  // firework sparks
+  for(let i = sparks.length - 1; i >= 0; i--){
+    const p = sparks[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vx *= 0.985; p.vy = p.vy * 0.985 + 0.04;
+    p.life -= p.decay;
+    if(p.life <= 0){ sparks.splice(i, 1); continue; }
+    alive = true;
+    confCtx.globalAlpha = p.life;
+    confCtx.fillStyle = p.color;
+    confCtx.beginPath();
+    confCtx.arc(p.x, p.y, 2.4, 0, Math.PI * 2);
+    confCtx.fill();
+  }
+  confCtx.globalAlpha = 1;
   if(alive) confRAF = requestAnimationFrame(drawConf);
-  else confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+  else { confRunning = false; confCtx.clearRect(0,0,confCanvas.width,confCanvas.height); }
+}
+
+function ensureConfLoop(){
+  if(confRunning) return;
+  confRunning = true;
+  confRAF = requestAnimationFrame(drawConf);
+}
+
+function fwBurst(){
+  const x = confCanvas.width  * (0.15 + Math.random() * 0.7);
+  const y = confCanvas.height * (0.12 + Math.random() * 0.35);
+  const color = CONF_COLORS[Math.floor(Math.random() * CONF_COLORS.length)];
+  const n = 48, off = Math.random() * 6.283;
+  for(let i = 0; i < n; i++){
+    const a = off + (i / n) * Math.PI * 2, sp = 2 + Math.random() * 3.5;
+    sparks.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, decay: 0.012 + Math.random() * 0.01, color });
+  }
+  ensureConfLoop();
+}
+
+function launchFireworks(){
+  clearInterval(fwTimer);
+  let n = 0;
+  fwTimer = setInterval(()=>{
+    fwBurst();
+    if(++n >= 6) clearInterval(fwTimer);
+  }, 700);
 }
 
 function launchConfetti(){
   if(confRAF) cancelAnimationFrame(confRAF);
+  confRunning = false;
   spawnConfetti();
-  confRAF = requestAnimationFrame(drawConf);
+  ensureConfLoop();
 }
 
 /* ============================================================
@@ -418,13 +540,13 @@ shareFab.addEventListener('click',()=>{
 shareClose.addEventListener('click',()=>{ sharePanel.hidden = true; });
 
 shareWA.addEventListener('click',()=>{
-  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret);
+  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret, shareFrom);
   const msg = `🎂 ${userName}-এর জন্য একটা বিশেষ Birthday Film! 🌸\n${link}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 });
 
 shareCopy.addEventListener('click',()=>{
-  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret);
+  const link = buildShareURL(userName, bdayDate, currentTheme, shareSecret, shareFrom);
   copyText(link).then(()=>{
     shareCopy.textContent = '✅ কপি হয়েছে!';
     setTimeout(()=>{ shareCopy.textContent = 'লিঙ্ক কপি 🔗'; }, 2000);
@@ -762,6 +884,7 @@ function treeFrame(now){
   if(!confettiFired && t >= T.bloomT0 + 0.5){
     confettiFired = true;
     launchConfetti();
+    launchFireworks();
   }
 
   if (!window.bdayDone && t >= T.done) window.bdayDone = true;
@@ -1025,6 +1148,7 @@ function fire(){
   if (played) return;
   played = true; drawing = false;
   stopBeat();
+  startMusic();
   cue('release'); cue('whoosh');
   filmTL = buildFilm(shotGeom());
   filmTL.play(0);
@@ -1074,6 +1198,7 @@ function armReplay(){
 
 function resetAll(){
   treeStop(); showWish(false);
+  clearInterval(fwTimer); sparks = [];
   window.bdayDone = false; replayArmed = false; confettiFired = false;
   replay.classList.remove('is-shown'); replay.hidden = true;
   shareFab.classList.remove('is-shown'); shareFab.hidden = true;
