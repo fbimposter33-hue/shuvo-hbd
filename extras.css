@@ -1,0 +1,250 @@
+/* ============================================================
+   EXTRAS — "আরও চমক" menu + activities
+   z-index map: fab 245 · menu/stage 255 · confetti 260 · toast 300
+   ============================================================ */
+.x-menu[hidden], .x-stage[hidden], .x-toast[hidden], .x-fab[hidden]{ display:none !important; }
+.x-fab, .x-menu, .x-stage, .x-toast, .x-menu *, .x-stage *{
+  font-family:"Hind Siliguri",system-ui,-apple-system,"Segoe UI",sans-serif;
+  box-sizing:border-box;
+}
+
+/* the film canvas must not scroll the page while you draw a finger trail */
+#tree{ touch-action:none; }
+
+/* --- finger trail ---------------------------------------- */
+.x-trail{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:256; }
+
+/* --- floating button ------------------------------------- */
+.x-fab{
+  position:fixed; left:20px; bottom:92px; z-index:245;
+  padding:10px 16px; border-radius:999px; border:1px solid rgba(150,60,80,.18);
+  font-size:15px; font-weight:700; line-height:1; color:#fff; cursor:pointer;
+  background:linear-gradient(135deg,#f0628a,#c41f52);
+  box-shadow:0 10px 24px -8px rgba(196,31,82,.7);
+  opacity:0; transform:translateY(10px);
+  transition:opacity .5s ease, transform .5s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.x-fab.is-shown{ opacity:1; transform:translateY(0); animation:x-fab-pulse 2.6s ease-in-out 1s infinite; }
+@keyframes x-fab-pulse{ 0%,100%{ box-shadow:0 10px 24px -8px rgba(196,31,82,.7); } 50%{ box-shadow:0 10px 30px -4px rgba(232,82,122,.95); } }
+
+/* --- menu (bottom sheet) --------------------------------- */
+.x-menu{
+  position:fixed; inset:0; z-index:255;
+  display:flex; align-items:flex-end; justify-content:center;
+  background:rgba(40,10,25,.55);
+  animation:x-fade .25s ease;
+}
+@keyframes x-fade{ from{ opacity:0; } to{ opacity:1; } }
+.x-sheet{
+  position:relative; width:min(100%,520px); max-height:86vh; overflow-y:auto;
+  padding:20px 16px 56px; border-radius:26px 26px 0 0;
+  background:linear-gradient(180deg,#fff9f5,#ffeef2);
+  box-shadow:0 -20px 60px -20px rgba(168,40,80,.5);
+  animation:x-up .35s cubic-bezier(.2,1.1,.4,1);
+}
+@keyframes x-up{ from{ transform:translateY(60px); opacity:0; } to{ transform:none; opacity:1; } }
+.x-h{ margin:0 0 14px; text-align:center; font-family:"Tiro Bangla","Hind Siliguri",serif; font-size:24px; color:#a3174f; }
+.x-x{
+  position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%;
+  border:none; cursor:pointer; font-size:14px; color:#7a2c4c; background:rgba(122,44,76,.1);
+  z-index:2;
+}
+.x-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.x-tile{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  min-height:92px; padding:10px 4px; border-radius:18px; border:1px solid #f4d2dc;
+  background:#fff; color:#7a2c4c; text-decoration:none; cursor:pointer; text-align:center;
+  box-shadow:0 8px 16px -12px rgba(168,40,80,.55);
+  transition:transform .15s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.x-tile:active{ transform:scale(.95); }
+.x-ti{ font-size:30px; line-height:1; }
+.x-tl{ font-size:13px; font-weight:600; line-height:1.25; }
+.x-tile--off{ opacity:.45; filter:grayscale(.5); }
+
+/* --- stage ----------------------------------------------- */
+.x-stage{
+  position:fixed; inset:0; z-index:255;
+  display:flex; flex-direction:column;
+  background:linear-gradient(165deg,#fff3ec 0%,#fbd3d9 55%,#f2a5bf 100%);
+  opacity:0; transition:opacity .25s ease;
+  color:#7a2c4c;
+}
+.x-stage.show{ opacity:1; }
+.x-stage[data-mode="dark"]{ background:linear-gradient(180deg,#0b1030,#2a1650); color:#ffe9c9; }
+.x-bar{
+  flex:none; height:56px; padding:0 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  position:relative; z-index:3;
+}
+.x-back{
+  border:none; cursor:pointer; padding:8px 14px; border-radius:999px; font-size:14px; font-weight:600;
+  color:#7a2c4c; background:rgba(255,255,255,.7);
+}
+.x-stage[data-mode="dark"] .x-back{ color:#ffe9c9; background:rgba(255,255,255,.14); }
+.x-title{ flex:1; text-align:center; font-family:"Tiro Bangla","Hind Siliguri",serif; font-size:19px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.x-bar .x-x{ position:static; }
+.x-stage[data-mode="dark"] .x-x{ color:#ffe9c9; background:rgba(255,255,255,.14); }
+.x-body{ position:relative; flex:1; overflow:hidden; }
+
+.x-toast{
+  position:fixed; left:50%; bottom:90px; z-index:300; transform:translate(-50%,12px);
+  width:max-content; max-width:88vw; padding:12px 18px; border-radius:16px; text-align:center;
+  font-size:15px; line-height:1.4; color:#fff; background:rgba(60,18,36,.92);
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.5);
+  opacity:0; transition:opacity .3s ease, transform .3s ease; pointer-events:none;
+}
+.x-toast.show{ opacity:1; transform:translate(-50%,0); }
+
+/* ============================================================
+   🎈 balloons
+   ============================================================ */
+.xb-score{ position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:2; padding:6px 16px; border-radius:999px; font-weight:700; background:rgba(255,255,255,.75); color:#a3174f; }
+.xb-bubble{
+  position:absolute; top:52px; left:50%; transform:translateX(-50%); z-index:2;
+  width:min(88vw,400px); padding:12px 16px; border-radius:18px; text-align:center; font-size:17px; line-height:1.5;
+  background:rgba(255,255,255,.88); color:#7a2c4c; box-shadow:0 10px 24px -14px rgba(168,40,80,.6);
+}
+.xb-field{ position:absolute; inset:0; overflow:hidden; }
+.xb-balloon{
+  position:absolute; bottom:-150px; width:84px; padding:10px; cursor:pointer; touch-action:none;
+  animation:xb-rise linear forwards; -webkit-tap-highlight-color:transparent;
+}
+.xb-balloon i{
+  display:block; position:relative; width:64px; height:78px; border-radius:50% 50% 46% 46%;
+  background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.8), rgba(255,255,255,0) 34%), var(--c);
+  box-shadow:inset -6px -8px 14px rgba(0,0,0,.16);
+  animation:xb-sway 2.4s ease-in-out infinite alternate;
+}
+.xb-balloon i::after{ content:""; position:absolute; left:50%; bottom:-6px; width:10px; height:10px; background:var(--c); transform:translateX(-50%) rotate(45deg); border-radius:2px; }
+.xb-balloon::after{ content:""; display:block; width:1.5px; height:36px; margin:8px auto 0; background:rgba(120,70,80,.45); }
+.xb-balloon.pop::after{ opacity:0; }
+.xb-balloon.pop i{ animation:xb-pop .26s ease-out forwards; }
+@keyframes xb-rise{ to{ transform:translateY(-125vh); } }
+@keyframes xb-sway{ from{ transform:rotate(-4deg); } to{ transform:rotate(4deg); } }
+@keyframes xb-pop{ to{ transform:scale(1.7); opacity:0; } }
+.xb-dot{ position:absolute; width:9px; height:9px; margin:-4px 0 0 -4px; border-radius:50%; pointer-events:none; animation:xb-dot .6s ease-out forwards; }
+@keyframes xb-dot{ to{ transform:translate(var(--dx),var(--dy)) scale(.3); opacity:0; } }
+
+/* ============================================================
+   🎫 scratch card
+   ============================================================ */
+.xs-wrap{ position:relative; width:min(88vw,360px); height:240px; margin:40px auto 14px; border-radius:22px; overflow:hidden; box-shadow:0 20px 40px -18px rgba(168,40,80,.6); }
+.xs-card{
+  position:absolute; inset:0; padding:22px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center;
+  background:linear-gradient(145deg,#fff,#ffe6ee); color:#7a2c4c;
+}
+.xs-big{ font-family:"Tiro Bangla","Hind Siliguri",serif; font-size:24px; color:#a3174f; line-height:1.3; }
+.xs-msg{ font-size:17px; line-height:1.55; overflow-wrap:anywhere; }
+.xs-canvas{ position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:grab; transition:opacity .6s ease; }
+.xs-canvas.gone{ opacity:0; pointer-events:none; }
+.xs-hint{ margin:0; text-align:center; font-size:16px; }
+
+/* ============================================================
+   🎁 gift
+   ============================================================ */
+.xg-wrap{ height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; padding:12px; overflow-y:auto; }
+.xg-msg{
+  display:none; width:min(88vw,340px); padding:18px 18px; border-radius:20px; text-align:center;
+  background:#fff; color:#7a2c4c; box-shadow:0 16px 34px -16px rgba(168,40,80,.7);
+}
+.xg-msg.show{ display:block; animation:xg-pop .5s cubic-bezier(.2,1.3,.4,1); }
+@keyframes xg-pop{ from{ opacity:0; transform:translateY(30px) scale(.8); } to{ opacity:1; transform:none; } }
+.xg-msg-t{ font-family:"Tiro Bangla","Hind Siliguri",serif; font-size:22px; color:#a3174f; margin-bottom:8px; }
+.xg-msg-b{ font-size:16.5px; line-height:1.55; overflow-wrap:anywhere; }
+.xg-box{ position:relative; width:190px; height:170px; cursor:pointer; flex:none; -webkit-tap-highlight-color:transparent; }
+.xg-body{ position:absolute; left:12px; right:12px; bottom:0; height:112px; border-radius:12px; background:linear-gradient(145deg,#ff8fae,#d81e57); box-shadow:0 18px 30px -14px rgba(140,10,60,.7); }
+.xg-body::before{ content:""; position:absolute; left:50%; top:0; bottom:0; width:26px; transform:translateX(-50%); background:linear-gradient(#ffe38c,#f4a626); }
+.xg-lid{
+  position:absolute; left:0; right:0; top:14px; height:56px; border-radius:12px; z-index:2;
+  background:linear-gradient(145deg,#ff9fba,#e0457a);
+  transition:transform .8s cubic-bezier(.3,1.3,.5,1), opacity .7s ease .1s;
+}
+.xg-lid::before{ content:""; position:absolute; left:50%; top:0; bottom:0; width:26px; transform:translateX(-50%); background:linear-gradient(#ffe38c,#f4a626); border-radius:2px; }
+.xg-bow{ position:absolute; left:50%; top:-34px; transform:translateX(-50%); font-size:48px; line-height:1; }
+.xg-box.open .xg-lid{ transform:translate(60px,-170px) rotate(26deg); opacity:0; }
+.xg-box.shake{ animation:xg-shake .4s ease; }
+@keyframes xg-shake{ 0%,100%{ transform:rotate(0); } 20%{ transform:rotate(-6deg); } 40%{ transform:rotate(6deg); } 60%{ transform:rotate(-4deg); } 80%{ transform:rotate(3deg); } }
+.xg-hint{ margin:0; font-size:17px; text-align:center; }
+
+/* ============================================================
+   💗 catch the hearts
+   ============================================================ */
+.xc-canvas{ position:absolute; inset:0; touch-action:none; cursor:ew-resize; }
+.xc-hud{ position:absolute; top:6px; left:50%; transform:translateX(-50%); padding:6px 18px; border-radius:999px; font-weight:700; white-space:pre; background:rgba(255,255,255,.78); color:#a3174f; pointer-events:none; }
+.xc-end{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(255,240,245,.9); text-align:center; z-index:3; }
+.xc-end-t{ font-family:"Tiro Bangla","Hind Siliguri",serif; font-size:30px; color:#a3174f; }
+.xc-end-s{ font-size:20px; }
+.xc-again{ margin-top:6px; padding:12px 26px; border:none; border-radius:14px; font-size:18px; font-weight:700; color:#fff; cursor:pointer; background:linear-gradient(135deg,#f0628a,#c41f52); }
+
+/* ============================================================
+   💌 letter
+   ============================================================ */
+.xl-paper{
+  width:min(90vw,440px); max-height:calc(100% - 62px); margin:14px auto 8px; padding:26px 22px; overflow-y:auto;
+  background:repeating-linear-gradient(#fffdf6 0 33px, #f1e6d8 33px 34px);
+  border-radius:8px; box-shadow:0 20px 40px -18px rgba(110,60,40,.6);
+  font-family:"Tiro Bangla","Hind Siliguri",serif; font-size:19px; line-height:34px; color:#5a2e3c; cursor:pointer;
+}
+.xl-text{ white-space:pre-wrap; overflow-wrap:anywhere; min-height:200px; }
+.xl-text.typing::after{ content:"▌"; margin-left:2px; color:#c41f52; animation:xl-blink .8s steps(1) infinite; }
+@keyframes xl-blink{ 50%{ opacity:0; } }
+.xl-hint{ margin:0; text-align:center; font-size:14px; opacity:.75; }
+
+/* ============================================================
+   🏮 lanterns + ✨ stars
+   ============================================================ */
+.xn-sky{ position:absolute; inset:0; overflow:hidden; }
+.xn-star{ position:absolute; width:3px; height:3px; border-radius:50%; background:#fff; animation:xn-tw 3s ease-in-out infinite; }
+@keyframes xn-tw{ 0%,100%{ opacity:.2; } 50%{ opacity:1; } }
+.xn-form{ position:absolute; left:50%; top:6px; transform:translateX(-50%); z-index:3; width:min(92vw,420px); display:flex; gap:8px; }
+.xn-input{ flex:1; min-width:0; padding:12px 14px; border-radius:14px; border:1.5px solid rgba(255,233,201,.5); outline:none; font-size:16px; color:#fff; background:rgba(255,255,255,.12); }
+.xn-input::placeholder{ color:rgba(255,233,201,.6); }
+.xn-btn{ flex:none; padding:0 16px; border:none; border-radius:14px; font-size:15px; font-weight:700; color:#3a1a00; cursor:pointer; background:linear-gradient(135deg,#ffd36a,#ffa02e); }
+.xn-lantern{
+  position:absolute; bottom:-130px; width:96px; padding:14px 8px 18px; text-align:center; border-radius:14px 14px 30px 30px;
+  background:radial-gradient(circle at 50% 70%, #fff3c4, #ffb347 60%, #e87d1e);
+  box-shadow:0 0 40px 10px rgba(255,170,60,.55), 0 0 90px 22px rgba(255,140,40,.25);
+  animation:xn-float linear forwards;
+}
+.xn-lantern::before{ content:""; position:absolute; top:-8px; left:14%; right:14%; height:10px; border-radius:6px 6px 0 0; background:#7a3b12; }
+.xn-text{ display:block; font-size:12.5px; line-height:1.3; font-weight:600; color:#6a2d06; overflow-wrap:anywhere; }
+@keyframes xn-float{
+  0%{ transform:translate(0,0) rotate(-3deg); opacity:0; }
+  8%{ opacity:1; }
+  50%{ transform:translate(16px,-58vh) rotate(3deg); }
+  100%{ transform:translate(-8px,-118vh) rotate(-2deg); opacity:.9; }
+}
+.xt-canvas{ position:absolute; inset:0; }
+
+/* ============================================================
+   📅 alive · 🌸 flower · 💝 compliments
+   ============================================================ */
+.xa-wrap, .xf-wrap, .xp-wrap{ height:100%; overflow-y:auto; padding:10px 16px 70px; }
+.xa-h, .xf-h, .xp-h{ margin:6px 0 14px; text-align:center; font-family:"Tiro Bangla","Hind Siliguri",serif; font-size:23px; line-height:1.35; color:#a3174f; }
+.xa-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:440px; margin:0 auto; }
+.xa-card{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:16px 8px; border-radius:20px; background:#fff; box-shadow:0 12px 24px -16px rgba(168,40,80,.7); text-align:center; }
+.xa-card:last-child{ grid-column:1 / -1; }
+.xa-ic{ font-size:30px; line-height:1.1; }
+.xa-n{ font-size:28px; line-height:1.2; color:#d4235c; font-variant-numeric:tabular-nums; }
+.xa-l{ font-size:14px; color:#8a4a5a; }
+.xa-note{ max-width:440px; margin:14px auto 0; text-align:center; font-size:13px; opacity:.75; }
+.xf-card{ display:flex; flex-direction:column; align-items:center; gap:6px; max-width:380px; margin:0 auto 14px; padding:22px 16px; border-radius:22px; background:#fff; text-align:center; box-shadow:0 14px 28px -18px rgba(168,40,80,.7); }
+.xf-ic{ font-size:54px; line-height:1.1; }
+.xf-t{ font-size:21px; color:#a3174f; }
+.xf-d{ font-size:15.5px; color:#7a2c4c; }
+.xf-gem{ width:54px; height:54px; border-radius:30% 30% 50% 50%; transform:rotate(45deg) scale(.8); background:radial-gradient(circle at 30% 28%, #fff, var(--g) 55%, rgba(0,0,0,.25)); box-shadow:0 8px 18px -6px var(--g); margin:6px 0; }
+.xp-sub{ margin:-8px 0 14px; text-align:center; font-size:14px; opacity:.75; }
+.xp-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:440px; margin:0 auto; }
+.xp-card{ position:relative; height:132px; padding:0; border:none; background:none; perspective:700px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.xp-in{ position:absolute; inset:0; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.3,1.2,.5,1); }
+.xp-card.flip .xp-in{ transform:rotateY(180deg); }
+.xp-f, .xp-b{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:10px; border-radius:18px; backface-visibility:hidden; -webkit-backface-visibility:hidden; text-align:center; }
+.xp-f{ font-size:34px; font-weight:700; color:#fff; background:linear-gradient(145deg,#f58aa8,#c41f52); box-shadow:0 12px 22px -14px rgba(168,40,80,.8); }
+.xp-b{ transform:rotateY(180deg); font-size:14.5px; line-height:1.45; color:#7a2c4c; background:#fff; box-shadow:0 12px 22px -14px rgba(168,40,80,.7); }
+
+@media (prefers-reduced-motion:reduce){
+  .x-fab.is-shown{ animation:none; }
+  .xb-balloon, .xn-lantern{ animation-duration:12s !important; }
+}
