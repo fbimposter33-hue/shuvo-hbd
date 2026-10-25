@@ -16,10 +16,12 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://shuvotrading35-a11y.github.io/HBD-Web/preview.jpg" />
   <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <link rel="manifest" href="./manifest.webmanifest" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Hind+Siliguri:wght@400;500;600;700&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet" />
 
   <script>
   document.documentElement.classList.add('js');
@@ -38,7 +40,13 @@
   ══════════════════════════════════════════════════════ -->
   <div class="setup" id="setup" aria-hidden="false">
     <div class="setup__card">
-      <p class="setup__label">🎂 কার জন্য এই উপহার?</p>
+      <p class="setup__label">🌐 ফিল্মের ভাষা</p>
+      <div class="lang-row" id="langRow">
+        <button class="lang-btn active" type="button" data-lang="bn">বাংলা</button>
+        <button class="lang-btn" type="button" data-lang="en">English</button>
+      </div>
+
+      <p class="setup__label" style="margin-top:18px">🎂 কার জন্য এই উপহার?</p>
       <input class="setup__input" id="nameInput" type="text" placeholder="নাম লেখো…" maxlength="30" autocomplete="off" />
 
       <p class="setup__label" style="margin-top:18px">💌 Secret Message (Tree tap করলে দেখাবে)</p>
@@ -73,6 +81,7 @@
         </div>
       </div>
       <button class="setup__go" id="setupGo">লিংক তৈরি করো ✨</button>
+      <button class="install-btn" id="installBtn" type="button" hidden>📲 হোম স্ক্রিনে যোগ করো</button>
     </div>
   </div>
 
@@ -106,11 +115,28 @@
 
   <!-- LOCK SCREEN — shown when a link is opened before its date -->
   <div class="lock" id="lockScreen" hidden>
+    <div class="lock__hearts" aria-hidden="true">
+      <span style="--x:8%;--d:9s;--s:18px;--dl:0s">♥</span>
+      <span style="--x:22%;--d:12s;--s:26px;--dl:2s">♥</span>
+      <span style="--x:38%;--d:10s;--s:14px;--dl:4s">♥</span>
+      <span style="--x:52%;--d:13s;--s:22px;--dl:1s">♥</span>
+      <span style="--x:66%;--d:9.5s;--s:16px;--dl:3s">♥</span>
+      <span style="--x:78%;--d:11s;--s:28px;--dl:5s">♥</span>
+      <span style="--x:90%;--d:12.5s;--s:18px;--dl:2.5s">♥</span>
+      <span style="--x:30%;--d:14s;--s:20px;--dl:6s">♥</span>
+      <span style="--x:72%;--d:15s;--s:12px;--dl:7s">♥</span>
+    </div>
     <div class="lock__card">
-      <p class="lock__icon">🔒</p>
+      <div class="lock__icon" aria-hidden="true">🔒</div>
       <p class="lock__title" id="lockTitle">এখনও সময় হয়নি…</p>
-      <p class="lock__sub">উপহারটা খুলবে আর একটু পরে</p>
-      <p class="lock__time" id="lockTime">--</p>
+      <p class="lock__sub" id="lockSub"></p>
+      <div class="lock__tiles">
+        <div class="lock__tile"><b id="lkD">০</b><span id="lkDl">দিন</span></div>
+        <div class="lock__tile"><b id="lkH">০০</b><span id="lkHl">ঘণ্টা</span></div>
+        <div class="lock__tile"><b id="lkM">০০</b><span id="lkMl">মিনিট</span></div>
+        <div class="lock__tile"><b id="lkS">০০</b><span id="lkSl">সেকেন্ড</span></div>
+      </div>
+      <p class="lock__foot" id="lockFoot"></p>
     </div>
   </div>
 
@@ -133,6 +159,23 @@
       <p class="cake-hint" id="cakeHint">মোমবাতিতে ট্যাপ করো, নয়তো নিচের বাটন চাপো</p>
       <button class="cake-blow" id="cakeBlow" type="button">ফুঁ দাও 💨</button>
       <button class="cake-close" id="cakeClose" type="button" aria-label="Close">✕</button>
+    </div>
+  </div>
+
+  <!-- DEVELOPER CREDIT (every page) + profile card -->
+  <button class="dev-credit" id="devCredit" type="button">Development by <b>Shuvo Ahmed</b></button>
+  <div class="dev-modal" id="devModal" hidden>
+    <div class="dev-card" role="dialog" aria-modal="true" aria-label="Developer profile">
+      <button class="dev-close" id="devClose" type="button" aria-label="Close">✕</button>
+      <div class="dev-avatar">
+        <span id="devInitial">S</span>
+        <img id="devImg" alt="" hidden />
+      </div>
+      <p class="dev-name" id="devName">Shuvo Ahmed</p>
+      <p class="dev-role" id="devRole">Developer</p>
+      <div class="dev-bubble" id="devBubble"></div>
+      <div class="dev-links" id="devLinks"></div>
+      <button class="install-btn" id="devInstall" type="button" hidden>📲 হোম স্ক্রিনে যোগ করো</button>
     </div>
   </div>
 
@@ -300,7 +343,7 @@
       <svg viewBox="0 0 24 24" aria-hidden="true" width="15" height="15">
         <path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor" />
       </svg>
-      Again
+      <span id="replayLabel">Again</span>
     </button>
 
     <div class="grade" aria-hidden="true">
