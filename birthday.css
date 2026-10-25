@@ -876,35 +876,62 @@ html[data-lang="bn"] .wish__hero{
 }
 @keyframes dev-pop{ from{ opacity:0; transform:scale(.88) translateY(14px); } to{ opacity:1; transform:none; } }
 .dev-card::before{
-  content:""; display:block; height:92px; margin:0 -20px;
-  background:linear-gradient(135deg,#f58aa8,#c41f52);
+  content:""; display:block; height:112px; margin:0 -20px;
+  background:
+    radial-gradient(circle at 18% 32%, rgba(255,255,255,.38) 0 5px, transparent 6px),
+    radial-gradient(circle at 82% 58%, rgba(255,255,255,.26) 0 10px, transparent 11px),
+    radial-gradient(circle at 64% 18%, rgba(255,255,255,.34) 0 3.5px, transparent 4.5px),
+    radial-gradient(circle at 30% 80%, rgba(255,255,255,.22) 0 7px, transparent 8px),
+    linear-gradient(135deg,#f78fb0 0%,#e0457a 55%,#b3174b 100%);
 }
 .dev-close{
   position:absolute; top:10px; right:12px; width:32px; height:32px; border-radius:50%;
   border:none; cursor:pointer; font-size:14px; color:#fff; background:rgba(255,255,255,.28);
 }
+/* rounded-square ("squircle") profile picture */
 .dev-avatar{
-  position:relative; width:92px; height:92px; margin:-46px auto 10px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
-  font:700 40px/1 "Hind Siliguri",sans-serif; color:#fff;
-  background:linear-gradient(145deg,#ff8fae,#d81e57);
-  border:4px solid #fffaf6; box-shadow:0 10px 24px -8px rgba(160,20,60,.55);
+  position:relative; width:112px; height:112px; margin:-58px auto 12px;
+  border-radius:32%; padding:5px; background:#fffaf6;
+  box-shadow:0 16px 30px -10px rgba(160,20,60,.55), 0 0 0 1px rgba(232,82,122,.12);
 }
-.dev-avatar img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.dev-avatar__in{
+  position:relative; width:100%; height:100%; border-radius:28%; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  font:700 44px/1 "Hind Siliguri",sans-serif; color:#fff;
+  background:linear-gradient(145deg,#ff9ab6,#d81e57);
+}
+.dev-avatar img{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:center 25%;   /* keep faces in frame */
+}
 .dev-avatar img[hidden]{ display:none; }
-.dev-name{ margin:0; font-size:22px; font-weight:700; color:#a3174f; }
-.dev-role{ margin:2px 0 14px; font-size:14px; opacity:.75; }
+.dev-avatar__badge{
+  position:absolute; right:-6px; bottom:-6px; width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-style:normal; font-size:16px;
+  background:#fff; box-shadow:0 6px 14px -4px rgba(160,20,60,.5);
+}
+.dev-name{ margin:0; font-size:24px; font-weight:700; color:#a3174f; letter-spacing:.2px; }
+.dev-role{
+  display:inline-block; margin:6px 0 16px; padding:4px 14px; border-radius:999px;
+  font-size:13px; font-weight:600; letter-spacing:.3px; color:#b3174b;
+  background:#ffe6ee; border:1px solid #f7c3d3;
+}
+.dev-role::before{ content:"✦ "; font-size:11px; }
 .dev-bubble{
   position:relative; margin:0 auto 14px; padding:11px 14px; max-width:92%;
   text-align:left; font-size:15px; line-height:1.55;
   background:#ffe8ef; border-radius:18px 18px 18px 4px; color:#7a2c4c;
+  box-shadow:0 6px 14px -8px rgba(168,40,80,.4);
+  animation:dev-bubble .5s ease .25s both;
 }
+@keyframes dev-bubble{ from{ opacity:0; transform:translateY(10px) scale(.96); } to{ opacity:1; transform:none; } }
 .dev-bubble:empty{ display:none; }
 .dev-links{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
 .dev-links a{
   padding:9px 16px; border-radius:999px; text-decoration:none;
   font-size:14px; font-weight:600; color:#fff;
   background:linear-gradient(135deg,#e8527a,#c41f52);
+  box-shadow:0 8px 16px -8px rgba(196,31,82,.7);
 }
 
 
