@@ -1454,8 +1454,10 @@ const DEV = {
   role:   'Developer',
   bubble: 'এই উপহারটা তৈরি করেছেন Shuvo Ahmed 💌',
   links: [
+    { label: '📸 Instagram', url: 'https://www.instagram.com/shuvo_9s' },
+    { label: '👍 Facebook',  url: 'https://www.facebook.com/shuvo.ahmead.7543' },
+    { label: '✈️ Telegram',  url: 'https://t.me/shuvo_9882' },
     // { label: '💬 WhatsApp', url: 'https://wa.me/8801XXXXXXXXX' },
-    // { label: 'Facebook',    url: 'https://facebook.com/your.profile' },
   ],
 };
 
