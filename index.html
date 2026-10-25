@@ -6,6 +6,15 @@
   <title>Happy Birthday ♥ — a little film</title>
   <meta name="description" content="A cinematic birthday film in four acts: a beating heart you open with a tap, a rush of colour, a kinetic wish, and a tree that blooms into a heart of petals." />
   <meta name="theme-color" content="#f7e7dc" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="🎂 একটা বিশেষ Birthday Film তোমার জন্য" />
+  <meta property="og:description" content="একটা ধনুক টানো, হৃদয়ে তীর ছোড়ো — আর দেখো একটা গাছ ফুলে ফুলে ভরে ওঠে। 🌸" />
+  <meta property="og:image" content="https://shuvo-hbd.vercel.app/preview.jpg" />
+  <meta property="og:image:width" content="1080" />
+  <meta property="og:image:height" content="1920" />
+  <meta property="og:url" content="https://shuvo-hbd.vercel.app/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://shuvo-hbd.vercel.app/preview.jpg" />
   <link rel="icon" type="image/png" href="./favicon.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -33,7 +42,10 @@
       <input class="setup__input" id="nameInput" type="text" placeholder="নাম লেখো…" maxlength="30" autocomplete="off" />
 
       <p class="setup__label" style="margin-top:18px">💌 Secret Message (Tree tap করলে দেখাবে)</p>
-      <textarea class="setup__input setup__textarea" id="secretInput" placeholder="তোমার জন্য একটা বিশেষ বার্তা লেখো…" maxlength="120" rows="3"></textarea>
+      <textarea class="setup__input setup__textarea" id="secretInput" placeholder="তোমার জন্য একটা বিশেষ বার্তা বা চিঠি লেখো…" maxlength="500" rows="4"></textarea>
+
+      <p class="setup__label" style="margin-top:18px">✍️ কার পক্ষ থেকে? (ঐচ্ছিক)</p>
+      <input class="setup__input" id="fromInput" type="text" placeholder="তোমার নাম…" maxlength="30" autocomplete="off" />
 
       <p class="setup__label" style="margin-top:18px">🎉 জন্মদিন কবে?</p>
       <input class="setup__input" id="bdayInput" type="date" />
@@ -44,6 +56,8 @@
         <button class="theme-btn"        data-theme="blue"  title="Blue">💙</button>
         <button class="theme-btn"        data-theme="purple" title="Purple">💜</button>
         <button class="theme-btn"        data-theme="gold"  title="Gold">✨</button>
+        <button class="theme-btn"        data-theme="green" title="Green">🍃</button>
+        <button class="theme-btn"        data-theme="night" title="Night">🌙</button>
       </div>
 
       <div class="link-preview" id="linkPreview" hidden>
@@ -85,6 +99,9 @@
        CONFETTI CANVAS (Act 4)
   ══════════════════════════════════════════════════════ -->
   <canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+  <!-- Music mute toggle (appears once the music starts) -->
+  <button class="music-btn" id="musicBtn" type="button" hidden aria-label="Music on/off" title="Music">🔊</button>
 
   <main class="scene" id="mainScene" style="display:none">
 
