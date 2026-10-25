@@ -1,0 +1,16 @@
+{
+  "name": "Happy Birthday ♥ — a little film",
+  "short_name": "Birthday",
+  "description": "A birthday film: draw the bow, strike the heart, watch a tree bloom.",
+  "lang": "bn",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7e7dc",
+  "theme_color": "#f7e7dc",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
