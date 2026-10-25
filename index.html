@@ -70,6 +70,9 @@
       <p class="setup__label" style="margin-top:18px">✍️ কার পক্ষ থেকে? (ঐচ্ছিক)</p>
       <input class="setup__input" id="fromInput" type="text" placeholder="তোমার নাম…" maxlength="30" autocomplete="off" />
 
+      <p class="setup__label" style="margin-top:18px">🎵 গানের লিংক (ঐচ্ছিক)</p>
+      <input class="setup__input" id="songInput" type="url" inputmode="url" placeholder="YouTube বা Spotify লিংক…" autocomplete="off" />
+
       <p class="setup__label" style="margin-top:18px">🎉 জন্মদিন কবে?</p>
       <input class="setup__input" id="bdayInput" type="date" />
       <label class="setup__check">
@@ -85,6 +88,7 @@
         <button class="theme-btn"        data-theme="gold"  title="Gold">✨</button>
         <button class="theme-btn"        data-theme="green" title="Green">🍃</button>
         <button class="theme-btn"        data-theme="night" title="Night">🌙</button>
+        <button class="theme-btn"        data-theme="auto"  title="Auto (day / night)">🌗</button>
       </div>
 
       <div class="link-preview" id="linkPreview" hidden>
@@ -183,8 +187,11 @@
     <div class="dev-card" role="dialog" aria-modal="true" aria-label="Developer profile">
       <button class="dev-close" id="devClose" type="button" aria-label="Close">✕</button>
       <div class="dev-avatar">
-        <span id="devInitial">S</span>
-        <img id="devImg" alt="" hidden />
+        <div class="dev-avatar__in">
+          <span id="devInitial">S</span>
+          <img id="devImg" alt="" hidden />
+        </div>
+        <i class="dev-avatar__badge" aria-hidden="true">💻</i>
       </div>
       <p class="dev-name" id="devName">Shuvo Ahmed</p>
       <p class="dev-role" id="devRole">Developer</p>
