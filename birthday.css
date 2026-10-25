@@ -906,3 +906,131 @@ html[data-lang="bn"] .wish__hero{
   font-size:14px; font-weight:600; color:#fff;
   background:linear-gradient(135deg,#e8527a,#c41f52);
 }
+
+
+/* ============================================================
+   ONE CLEAN BENGALI-FIRST UI FONT (setup, banners, buttons, cards)
+   Latin keeps the elegant serif only inside the film itself.
+   ============================================================ */
+.setup, .setup *,
+.countdown-banner, .secret-toast, .cake-box, .cake-box *, .cake-open,
+.share-btn, .dev-credit, .dev-card, .dev-card *, .install-btn, .lang-btn, .lock__card *{
+  font-family:"Hind Siliguri",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+.setup .link-box{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+.lock__title, .cake-title{ font-family:"Tiro Bangla","Hind Siliguri",serif !important; }
+
+/* ============================================================
+   SETUP SCREEN — redesigned
+   ============================================================ */
+.setup{
+  background:
+    radial-gradient(80% 50% at 15% 0%, rgba(255,255,255,.8), rgba(255,255,255,0) 70%),
+    radial-gradient(70% 50% at 100% 100%, rgba(244,150,180,.35), rgba(244,150,180,0) 70%),
+    linear-gradient(165deg,#fff4ee 0%,#fbd9de 55%,#f3b3c8 100%);
+  padding:28px 0 64px;
+  align-items:flex-start;              /* never clip the top of a tall card */
+}
+@supports (align-items:safe center){ .setup{ align-items:safe center; } }
+.setup__hearts{ position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+.setup__hearts span{
+  position:absolute; left:var(--x); bottom:-40px; font-size:var(--s);
+  color:rgba(232,82,122,.32); animation:lock-float var(--d) linear var(--dl) infinite;
+}
+.setup__card{
+  position:relative; width:min(92vw,420px);
+  padding:0 22px 26px; border-radius:30px; text-align:left;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 34px 80px -26px rgba(168,40,80,.45), inset 0 1px 0 #fff;
+  margin:44px auto 0;
+}
+.setup__head{ text-align:center; padding-top:0; margin-bottom:6px; }
+.setup__badge{
+  width:76px; height:76px; margin:-38px auto 12px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:36px;
+  background:linear-gradient(145deg,#fff,#ffe1e8);
+  box-shadow:0 14px 28px -8px rgba(200,40,90,.45), 0 0 0 6px rgba(255,255,255,.65);
+}
+.setup__title{
+  margin:0 0 6px; font-family:"Tiro Bangla","Hind Siliguri",serif !important;
+  font-weight:400; font-size:clamp(24px,6.6vw,30px); line-height:1.3; color:#a3174f;
+}
+.setup__subtitle{ margin:0 0 4px; font-size:14.5px; line-height:1.5; color:#8a4a5a; opacity:.9; }
+
+.setup__label{
+  display:block; margin:20px 0 8px;
+  font-size:15px; font-weight:600; font-style:normal; letter-spacing:0;
+  color:#8a3555; text-align:left;
+}
+.setup__input{
+  width:100%; padding:13px 16px; font-size:16px; line-height:1.5; font-weight:500;
+  color:#5a2538; background:#fff;
+  border:1.5px solid #f0cdd9; border-radius:14px; outline:none;
+  box-shadow:0 2px 6px -3px rgba(168,40,80,.15);
+  transition:border-color .2s, box-shadow .2s;
+}
+.setup__input::placeholder{ color:#c4a0ad; font-weight:400; }
+.setup__input:focus{ border-color:#e8527a; box-shadow:0 0 0 4px rgba(232,82,122,.15); }
+.setup__input[type="date"]{ min-height:50px; }
+.setup__textarea{ min-height:112px; line-height:1.6; }
+.setup__count{ margin-top:5px; text-align:right; font-size:12.5px; color:#b07a8c; }
+
+/* language + theme */
+.lang-row{ display:flex; gap:10px; }
+.lang-btn{
+  flex:1; padding:11px 0; font-size:16px; font-weight:600; color:#9a4560;
+  background:#fff; border:1.5px solid #f0cdd9; border-radius:14px; cursor:pointer;
+  transition:all .2s;
+}
+.lang-btn.active{ color:#fff; border-color:transparent; background:linear-gradient(135deg,#ee5f86,#c41f52); box-shadow:0 8px 18px -8px rgba(196,31,82,.6); transform:none; }
+
+.theme-row{ display:flex; flex-wrap:nowrap; gap:8px; justify-content:space-between; margin-top:0; padding:8px 6px 6px; }
+.theme-btn{
+  flex:1; max-width:52px; aspect-ratio:1; width:auto; height:auto; border-radius:50%;
+  font-size:21px; border:3px solid #fff; cursor:pointer; padding:0;
+  box-shadow:0 6px 14px -6px rgba(120,30,60,.45);
+  transition:transform .2s, box-shadow .2s;
+}
+.theme-btn[data-theme="pink"]  { background:linear-gradient(145deg,#ffe3ec,#ff8fb0); }
+.theme-btn[data-theme="blue"]  { background:linear-gradient(145deg,#dff0ff,#6fb2ff); }
+.theme-btn[data-theme="purple"]{ background:linear-gradient(145deg,#f0defe,#b774f8); }
+.theme-btn[data-theme="gold"]  { background:linear-gradient(145deg,#fff1cf,#f6b43a); }
+.theme-btn[data-theme="green"] { background:linear-gradient(145deg,#dcf9e7,#52d88a); }
+.theme-btn[data-theme="night"] { background:linear-gradient(145deg,#d9ddff,#6d78f5); }
+.theme-btn.active{ transform:scale(1.1); box-shadow:0 0 0 2px #d94070, 0 10px 20px -8px rgba(160,20,60,.6); }
+
+/* lock switch */
+.setup__check{
+  display:flex; align-items:center; gap:12px; margin-top:12px; padding:12px 14px;
+  background:#fff; border:1.5px solid #f0cdd9; border-radius:14px; cursor:pointer;
+  font-size:15px; color:#8a3555;
+}
+.setup__check input{
+  appearance:none; -webkit-appearance:none; flex:none; position:relative;
+  width:46px; height:26px; margin:0; border-radius:999px; cursor:pointer;
+  background:#ecd3dc; transition:background .2s;
+}
+.setup__check input::after{
+  content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%;
+  background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.25); transition:transform .2s;
+}
+.setup__check input:checked{ background:linear-gradient(135deg,#ee5f86,#c41f52); }
+.setup__check input:checked::after{ transform:translateX(20px); }
+.setup__checkText{ display:flex; flex-direction:column; line-height:1.35; font-weight:600; }
+.setup__checkText small{ font-weight:400; font-size:12.5px; opacity:.75; }
+
+/* main button */
+.setup__go{
+  margin-top:24px; width:100%; padding:15px 0; border:none; border-radius:16px;
+  font-size:18px; font-weight:700; letter-spacing:0; color:#fff; cursor:pointer;
+  background:linear-gradient(135deg,#f0628a,#c41f52);
+  box-shadow:0 14px 28px -10px rgba(196,31,82,.65);
+  transition:transform .18s, box-shadow .18s;
+}
+.setup__go:hover{ transform:translateY(-2px); }
+.setup__go:active{ transform:translateY(1px); }
+
+.link-box{ background:#fff; border:1.5px dashed #eab6c6; border-radius:12px; max-height:92px; overflow-y:auto; }
+.setup .share-btn{ font-weight:600; }
