@@ -26,6 +26,8 @@ const urlMsg   = params.get('msg')  || '';
 const urlFrom  = params.get('from') || '';
 const urlLock  = params.get('lock') === '1';
 const urlSong  = params.get('song') || '';
+const urlDob   = params.get('dob')  || '';
+const isoDate  = (v)=> /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : '';
 const isViewer = !!urlName;   // true = received a link, skip setup
 
 /* ============================================================
@@ -123,6 +125,7 @@ let shareSecret = urlMsg;
 let shareFrom   = urlFrom;
 let shareLock   = urlLock;
 let shareSong   = /^https?:\/\//i.test(urlSong) ? urlSong : '';
+let shareDob    = isoDate(urlDob);
 
 function buildShareURL(name, date, theme, secret, from, lock){
   const base = location.origin + location.pathname;
@@ -135,6 +138,7 @@ function buildShareURL(name, date, theme, secret, from, lock){
   if(lock && date) p.set('lock', '1');
   if(lang === 'en') p.set('lang', 'en');
   if(shareSong) p.set('song', shareSong);
+  if(shareDob)  p.set('dob', shareDob);
   return base + '?' + p.toString();
 }
 
@@ -150,7 +154,9 @@ function personalise(name, date){
   if(urlMsg || (document.getElementById('secretInput')?.value||'').trim()){
     SECRETS = [secretVal];
   }
-  if(bdayDate) showCountdown(bdayDate);
+  // countdown: the occasion date if given, otherwise the birth date (month + day)
+  const cdDate = bdayDate || shareDob;
+  if(cdDate) showCountdown(cdDate);
 }
 
 // Fill every piece of film text in the chosen language and re-split the headline.
@@ -232,6 +238,7 @@ function generateLink(){
   shareLock = lockOn;
   const songRaw = (document.getElementById('songInput')?.value || '').trim();
   shareSong = /^https?:\/\//i.test(songRaw) ? songRaw : '';
+  shareDob = isoDate(document.getElementById('dobInput')?.value || '');
   const link   = buildShareURL(name, date, currentTheme, secret, (document.getElementById('fromInput')?.value || '').trim(), lockOn);
   // Update SECRETS for own preview
   shareSecret = secret;
@@ -293,7 +300,7 @@ document.querySelectorAll('.lang-btn').forEach(btn=>{
   });
 });
 ['input','change'].forEach(ev=>{
-  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput'), document.getElementById('lockInput'), document.getElementById('songInput')].forEach(el=>{
+  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput'), document.getElementById('lockInput'), document.getElementById('songInput'), document.getElementById('dobInput')].forEach(el=>{
     el && el.addEventListener(ev, ()=>{
       if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
     });
@@ -1464,6 +1471,7 @@ if (reduceMotion){
 const extras = initExtras({
   getName:    () => userName,
   getDate:    () => bdayDate,
+  getDob:     () => shareDob,
   getMessage: () => shareSecret,
   getFrom:    () => shareFrom,
   getSong:    () => shareSong,
