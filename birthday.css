@@ -90,7 +90,7 @@ body{
 .hero__eyebrow{
   position:absolute; top:13%; left:0; right:0;
   text-align:center;
-  font-family:"Cormorant Garamond", Georgia, serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-style:italic; font-weight:600;
   font-size:clamp(15px, 3.6vw, 26px);
   letter-spacing:.06em;
@@ -185,7 +185,7 @@ body{
 .hero__hint{
   position:absolute; bottom:8.5%; left:0; right:0;
   text-align:center;
-  font-family:"Cormorant Garamond", Georgia, serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-weight:600; font-style:italic;
   font-size:clamp(13px, 3.1vw, 19px);
   letter-spacing:.16em; text-transform:uppercase;
@@ -260,7 +260,7 @@ body{
   will-change:transform;
 }
 .kEyebrow{
-  font-family:"Cormorant Garamond", Georgia, serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-style:italic; font-weight:500;
   font-size:clamp(15px, 3.6vw, 27px);
   letter-spacing:.08em;
@@ -298,7 +298,7 @@ body{
 }
 .kSub{
   margin-top:clamp(12px,2.4vh,26px);
-  font-family:"Cormorant Garamond", Georgia, serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-weight:500; font-style:italic;
   font-size:clamp(14px, 3.4vw, 24px);
   letter-spacing:.05em;
@@ -348,7 +348,7 @@ body{
 }
 .wish.is-in::before{ opacity:1; }
 .wish__eyebrow{
-  font-family:"Cormorant Garamond", Georgia, serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-style:italic; font-weight:600;
   font-size:clamp(13px, 3.2vw, 24px);
   letter-spacing:.05em; color:#9c4f63;
@@ -391,7 +391,7 @@ body{
   transform-origin:left center;
 }
 .wish__sub{
-  font-family:"Cormorant Garamond", Georgia, serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-weight:600; font-size:clamp(12px, 2.9vw, 20px);
   letter-spacing:.03em; color:#6e3f4a;
   text-shadow:0 1px 2px #fff8f1, 0 0 8px rgba(255,248,241,.98);
@@ -424,10 +424,10 @@ body{
    REPLAY
    ============================================================ */
 .replay{
-  position:absolute; right:20px; bottom:18px; z-index:7;
+  position:absolute; right:20px; bottom:44px; z-index:7;
   display:inline-flex; align-items:center; gap:7px;
   padding:9px 15px 9px 12px; border-radius:999px;
-  font:600 12.5px/1 "Cormorant Garamond", Georgia, serif; letter-spacing:.12em; text-transform:uppercase;
+  font:600 12.5px/1 "Cormorant Garamond","Hind Siliguri",Georgia,serif; letter-spacing:.12em; text-transform:uppercase;
   color:#8a4a5a; background:rgba(255,248,242,.72);
   border:1px solid rgba(150,60,80,.18);
   box-shadow:0 6px 20px -8px rgba(120,20,50,.4);
@@ -477,6 +477,7 @@ body{
   background:radial-gradient(135% 110% at 50% 20%, #fff6ee 0%, #f9dfd4 55%, #f0c4b8 100%);
   transition: opacity .5s ease, visibility .5s ease;
   overflow-y:auto;
+  padding:16px 0 56px;
 }
 .setup.hide{ opacity:0; visibility:hidden; pointer-events:none; }
 
@@ -492,7 +493,7 @@ body{
   margin: auto;
 }
 .setup__label{
-  font-family:"Cormorant Garamond",Georgia,serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-size:16px; font-weight:600; font-style:italic;
   color:#9a4560; margin-bottom:10px; display:block;
   text-align:left;
@@ -501,7 +502,7 @@ body{
   width:100%; padding:11px 16px;
   border:1.5px solid rgba(180,80,110,.22);
   border-radius:12px; font-size:16px;
-  font-family:"Cormorant Garamond",Georgia,serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   color:#6e3040; background:rgba(255,248,244,.9);
   outline:none; transition:border-color .25s;
 }
@@ -525,7 +526,7 @@ body{
 .setup__go{
   margin-top:22px; width:100%;
   padding:13px 0; border:none; border-radius:14px;
-  font-family:"Cormorant Garamond",Georgia,serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-size:18px; font-weight:700; letter-spacing:.06em;
   color:#fff;
   background:linear-gradient(135deg,#e8527a,#c41f52);
@@ -542,7 +543,7 @@ body{
   background:rgba(255,248,244,.88);
   backdrop-filter:blur(8px);
   text-align:center;
-  font-family:"Cormorant Garamond",Georgia,serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-size:15px; color:#9a4560;
   border-bottom:1px solid rgba(200,100,130,.15);
   box-shadow:0 2px 12px rgba(168,40,80,.08);
@@ -574,7 +575,7 @@ body{
 
 /* --- SHARE FAB -------------------------------------------- */
 .share-fab{
-  position:absolute; right:20px; bottom:54px; z-index:7;
+  position:absolute; right:20px; bottom:80px; z-index:7;
   width:44px; height:44px; border-radius:50%;
   border:none; cursor:pointer;
   background:rgba(255,248,242,.78);
@@ -590,7 +591,7 @@ body{
 
 /* --- SHARE PANEL ------------------------------------------ */
 .share-panel{
-  position:fixed; bottom:110px; right:16px; z-index:96;
+  position:fixed; bottom:136px; right:16px; z-index:96;
   display:flex; flex-direction:column; gap:10px;
   align-items:flex-end;
   animation:slideUp .3s ease;
@@ -599,7 +600,7 @@ body{
 
 .share-btn{
   padding:10px 18px; border:none; border-radius:50px;
-  font-family:"Cormorant Garamond",Georgia,serif;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif;
   font-size:15px; font-weight:600; cursor:pointer;
   box-shadow:0 6px 18px -4px rgba(0,0,0,.15);
   transition:transform .18s, box-shadow .18s;
@@ -688,26 +689,13 @@ html.viewer-mode .setup{
 .setup__check{
   display:flex; align-items:flex-start; gap:8px; margin-top:10px;
   text-align:left; cursor:pointer;
-  font-family:"Cormorant Garamond",Georgia,serif; font-size:14px; color:#9a4560;
+  font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif; font-size:14px; color:#9a4560;
 }
 .setup__check input{ margin-top:3px; accent-color:#d94070; flex:none; }
 
-/* --- LOCK SCREEN ------------------------------------------- */
-.lock{
-  position:fixed; inset:0; z-index:400;
-  display:flex; align-items:center; justify-content:center; padding:20px;
-  background:radial-gradient(135% 110% at 50% 20%, #fff6ee 0%, #f9dfd4 55%, #f0c4b8 100%);
-}
-.lock[hidden]{ display:none; }
-.lock__card{ text-align:center; max-width:420px; font-family:"Cormorant Garamond","Hind Siliguri",Georgia,serif; color:#8a3555; }
-.lock__icon{ font-size:64px; line-height:1; margin:0 0 14px; }
-.lock__title{ font-size:clamp(26px,7vw,36px); font-weight:700; margin:0 0 8px; }
-.lock__sub{ font-size:18px; margin:0 0 22px; opacity:.85; }
-.lock__time{ font-size:clamp(20px,5.6vw,28px); font-weight:700; color:#d43060; margin:0; line-height:1.5; }
-
 /* --- CAKE -------------------------------------------------- */
 .cake-open{
-  position:absolute; left:20px; bottom:18px; z-index:7;
+  position:absolute; left:20px; bottom:44px; z-index:7;
   padding:9px 15px; border-radius:999px;
   font:600 14px/1 "Cormorant Garamond","Hind Siliguri",Georgia,serif; color:#8a4a5a;
   background:rgba(255,248,242,.78); border:1px solid rgba(150,60,80,.18);
@@ -751,3 +739,170 @@ html.viewer-mode .setup{
 .flame{ transform-box:fill-box; transform-origin:50% 100%; animation:flame-flick .45s ease-in-out infinite alternate; transition:opacity .35s ease, transform .35s ease; }
 .candle.out .flame{ opacity:0; transform:scale(.2); animation:none; }
 @keyframes flame-flick{ from{ transform:scale(1,1) rotate(-3deg); } to{ transform:scale(.92,1.08) rotate(3deg); } }
+
+
+/* ============================================================
+   BENGALI TYPOGRAPHY
+   ============================================================ */
+.setup__label{ font-style:normal; font-weight:600; font-size:16px; }
+html[data-lang="bn"] .hero__eyebrow,
+html[data-lang="bn"] .hero__hint,
+html[data-lang="bn"] .kEyebrow,
+html[data-lang="bn"] .kSub,
+html[data-lang="bn"] .wish__eyebrow,
+html[data-lang="bn"] .wish__sub,
+html[data-lang="bn"] .replay{
+  font-family:"Tiro Bangla","Hind Siliguri",serif;
+  font-style:normal; font-weight:400;
+  letter-spacing:0; text-transform:none;
+}
+html[data-lang="bn"] .hero__hint{ font-size:clamp(15px,3.6vw,22px); }
+html[data-lang="bn"] .hl__word{
+  font-family:"Tiro Bangla","Hind Siliguri",serif;
+  font-weight:400; letter-spacing:0;
+  font-size:clamp(46px,13.5vw,150px);
+  -webkit-text-stroke:.02em currentColor;
+}
+html[data-lang="bn"] .headline{ line-height:1.1; }
+html[data-lang="bn"] .mask{ padding:.3em .08em; margin:-.3em -.08em; }
+html[data-lang="bn"] .wish__hero{
+  font-family:"Tiro Bangla","Hind Siliguri",serif;
+  font-size:clamp(32px,8.2vw,70px);
+  line-height:1.3; padding-bottom:.1em;
+}
+
+/* --- LANGUAGE ROW ------------------------------------------ */
+.lang-row{ display:flex; gap:10px; justify-content:center; }
+.lang-btn{
+  flex:1; padding:10px 0; border-radius:12px; cursor:pointer;
+  font:600 16px/1 "Cormorant Garamond","Hind Siliguri",Georgia,serif; color:#9a4560;
+  background:rgba(255,248,244,.9); border:1.5px solid rgba(180,80,110,.22);
+  transition:border-color .2s, background .2s, transform .2s;
+}
+.lang-btn.active{ border-color:#d94070; background:#fff; transform:scale(1.03); }
+
+/* --- INSTALL BUTTON ---------------------------------------- */
+.install-btn{
+  margin-top:12px; width:100%; padding:11px 0; border-radius:14px; cursor:pointer;
+  font:600 15px/1 "Cormorant Garamond","Hind Siliguri",Georgia,serif; color:#9a4560;
+  background:rgba(255,248,244,.95); border:1.5px dashed rgba(180,80,110,.4);
+}
+.install-btn[hidden]{ display:none; }
+
+/* ============================================================
+   LOCK SCREEN
+   ============================================================ */
+.lock{
+  position:fixed; inset:0; z-index:400; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; padding:20px 20px 60px;
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(255,255,255,.75), rgba(255,255,255,0) 70%),
+    linear-gradient(165deg, #fff3ec 0%, #fbd3d9 48%, #f2a5bf 100%);
+}
+.lock[hidden]{ display:none; }
+.lock__hearts{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.lock__hearts span{
+  position:absolute; left:var(--x); bottom:-40px;
+  font-size:var(--s); color:rgba(232,82,122,.45);
+  animation:lock-float var(--d) linear var(--dl) infinite;
+}
+@keyframes lock-float{
+  0%{ transform:translateY(0) rotate(-8deg); opacity:0; }
+  12%{ opacity:1; }
+  100%{ transform:translateY(-115vh) rotate(14deg); opacity:0; }
+}
+.lock__card{
+  position:relative; width:min(92vw,430px); text-align:center;
+  padding:34px 22px 28px; border-radius:30px;
+  background:rgba(255,255,255,.62);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 30px 70px -20px rgba(168,40,80,.45), inset 0 1px 0 rgba(255,255,255,.9);
+  font-family:"Hind Siliguri","Cormorant Garamond",Georgia,serif; color:#7a2c4c;
+}
+.lock__icon{
+  width:84px; height:84px; margin:-76px auto 14px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:40px;
+  background:linear-gradient(145deg,#fff,#ffe1e8);
+  box-shadow:0 14px 30px -8px rgba(200,40,90,.45), 0 0 0 6px rgba(255,255,255,.6);
+  animation:lock-bob 3s ease-in-out infinite;
+}
+@keyframes lock-bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+.lock__title{
+  font-family:"Tiro Bangla","Hind Siliguri",serif;
+  font-size:clamp(26px,7.4vw,36px); line-height:1.3; margin:0 0 8px; color:#a3174f;
+}
+.lock__sub{ font-size:17px; line-height:1.5; margin:0 0 22px; opacity:.85; }
+.lock__tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin:0 0 20px; }
+.lock__tile{
+  padding:12px 2px 10px; border-radius:16px;
+  background:linear-gradient(180deg,#fff,#ffeef2);
+  box-shadow:0 8px 18px -10px rgba(168,40,80,.5), inset 0 -2px 0 rgba(232,82,122,.18);
+}
+.lock__tile b{
+  display:block; font-family:"Hind Siliguri",sans-serif; font-weight:700;
+  font-size:clamp(24px,7.4vw,34px); line-height:1.15; color:#d4235c;
+  font-variant-numeric:tabular-nums;
+}
+.lock__tile span{ display:block; margin-top:2px; font-size:12.5px; font-weight:500; color:#8a4a5a; }
+.lock__foot{ margin:0; font-size:15px; opacity:.8; }
+
+/* ============================================================
+   DEVELOPER CREDIT + PROFILE CARD
+   ============================================================ */
+.dev-credit{
+  position:fixed; left:50%; bottom:8px; transform:translateX(-50%); z-index:450;
+  padding:6px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;
+  font:500 12px/1.2 "Cormorant Garamond","Hind Siliguri",Georgia,serif; letter-spacing:.04em;
+  color:#8a4a5a; background:rgba(255,250,246,.78);
+  border:1px solid rgba(150,60,80,.15);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  box-shadow:0 4px 14px -6px rgba(120,20,50,.35);
+  -webkit-tap-highlight-color:transparent;
+}
+.dev-credit b{ color:#c41f52; font-weight:700; }
+.dev-modal{
+  position:fixed; inset:0; z-index:500; padding:16px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(40,10,25,.55);
+}
+.dev-modal[hidden]{ display:none; }
+.dev-card{
+  position:relative; width:min(92vw,360px); padding:0 20px 22px; text-align:center;
+  background:#fffaf6; border-radius:26px; overflow:hidden;
+  box-shadow:0 26px 70px -14px rgba(168,40,80,.55);
+  font-family:"Hind Siliguri","Cormorant Garamond",Georgia,serif; color:#6e3040;
+  animation:dev-pop .35s cubic-bezier(.2,1.3,.4,1);
+}
+@keyframes dev-pop{ from{ opacity:0; transform:scale(.88) translateY(14px); } to{ opacity:1; transform:none; } }
+.dev-card::before{
+  content:""; display:block; height:92px; margin:0 -20px;
+  background:linear-gradient(135deg,#f58aa8,#c41f52);
+}
+.dev-close{
+  position:absolute; top:10px; right:12px; width:32px; height:32px; border-radius:50%;
+  border:none; cursor:pointer; font-size:14px; color:#fff; background:rgba(255,255,255,.28);
+}
+.dev-avatar{
+  position:relative; width:92px; height:92px; margin:-46px auto 10px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+  font:700 40px/1 "Hind Siliguri",sans-serif; color:#fff;
+  background:linear-gradient(145deg,#ff8fae,#d81e57);
+  border:4px solid #fffaf6; box-shadow:0 10px 24px -8px rgba(160,20,60,.55);
+}
+.dev-avatar img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.dev-avatar img[hidden]{ display:none; }
+.dev-name{ margin:0; font-size:22px; font-weight:700; color:#a3174f; }
+.dev-role{ margin:2px 0 14px; font-size:14px; opacity:.75; }
+.dev-bubble{
+  position:relative; margin:0 auto 14px; padding:11px 14px; max-width:92%;
+  text-align:left; font-size:15px; line-height:1.55;
+  background:#ffe8ef; border-radius:18px 18px 18px 4px; color:#7a2c4c;
+}
+.dev-bubble:empty{ display:none; }
+.dev-links{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.dev-links a{
+  padding:9px 16px; border-radius:999px; text-decoration:none;
+  font-size:14px; font-weight:600; color:#fff;
+  background:linear-gradient(135deg,#e8527a,#c41f52);
+}
