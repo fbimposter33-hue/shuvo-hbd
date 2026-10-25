@@ -88,6 +88,8 @@ export function initExtras(ctx){
   const message = () => (ctx.getMessage() || '').trim();
   const fromWho = () => (ctx.getFrom() || '').trim();
   const song    = () => safeUrl((ctx.getSong() || '').trim());
+  // birth date: the dedicated field first, else the (older) single date field
+  const birth   = () => parseDate(ctx.getDob ? ctx.getDob() : '') || parseDate(ctx.getDate());
 
   const api = {
     name, message, fromWho,
@@ -581,7 +583,7 @@ export function initExtras(ctx){
 
   /* ---- 📅 how long you've been here ---- */
   function aliveInfo(){
-    const d = parseDate(ctx.getDate());
+    const d = birth();
     if (!d) return null;
     const now = new Date();
     const days = Math.floor((now - d) / 86400000);
@@ -623,7 +625,7 @@ export function initExtras(ctx){
 
   /* ---- 🌸 birth flower & stone ---- */
   function runFlower(host){
-    const d = parseDate(ctx.getDate());
+    const d = birth();
     const m = MONTHS[d.getMonth()];
     const wrap = el('div', 'xf-wrap');
     wrap.append(el('p', 'xf-h', `${m[0]} মাসের জন্য`));
@@ -663,7 +665,7 @@ export function initExtras(ctx){
      ============================================================ */
   function tiles(){
     const info = aliveInfo();
-    const date = parseDate(ctx.getDate());
+    const date = birth();
     const list = [
       { icon: '🎂', label: 'কেক',            action: () => { closeAll(); ctx.openCake(); } },
       { icon: '🎈', label: 'বেলুন ফাটাও',    title: '🎈 বেলুন ফাটাও',    run: runBalloons },
@@ -674,7 +676,7 @@ export function initExtras(ctx){
       { icon: '🏮', label: 'ইচ্ছের লণ্ঠন',  title: '🏮 ইচ্ছের লণ্ঠন',   run: runLantern },
       { icon: '✨', label: 'নামের তারা',     title: '✨ নামের তারামণ্ডল', run: runStars },
       { icon: '📅', label: 'তুমি এতদিন',     title: '📅 তুমি এতদিন',     run: runAlive,
-        off: info ? '' : 'জন্মতারিখ সালসহ দিলে (অন্তত ১ বছর আগের) এটা দেখা যাবে' },
+        off: info ? '' : 'জন্মতারিখ (সালসহ, অন্তত ১ বছর আগের) দিলে এটা দেখা যাবে' },
       { icon: '🌸', label: 'জন্মফুল ও পাথর', title: '🌸 জন্মফুল ও জন্মপাথর', run: runFlower,
         off: date ? '' : 'জন্মতারিখ দিলে এটা দেখা যাবে' },
       { icon: '💝', label: 'প্রশংসার কার্ড', title: '💝 প্রশংসার কার্ড',  run: runCompliments },
