@@ -243,7 +243,7 @@ function generateLink(){
   personalise(name, date);
 
   // Change button to "Film দেখো"
-  setupGo.textContent = 'Film দেখো 🎬';
+  setupGo.textContent = 'ফিল্ম দেখো 🎬';
 
   previewWA.onclick = ()=>{
     const msg = I18N[lang].share(name, link);
@@ -292,6 +292,12 @@ document.querySelectorAll('.theme-btn').forEach(btn=>{
     if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
   });
 });
+{
+  const msgBox = document.getElementById('secretInput');
+  const msgCount = document.getElementById('msgCount');
+  const updCount = ()=>{ if(msgBox && msgCount) msgCount.textContent = `${msgBox.value.length}/${msgBox.maxLength > 0 ? msgBox.maxLength : 500}`; };
+  if(msgBox){ msgBox.addEventListener('input', updCount); updCount(); }
+}
 nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') bdayInput.focus(); });
 bdayInput.addEventListener('keydown', e=>{ if(e.key==='Enter') generateLink(); });
 
