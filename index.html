@@ -39,7 +39,21 @@
        Shown before anything else; JS hides it on confirm.
   ══════════════════════════════════════════════════════ -->
   <div class="setup" id="setup" aria-hidden="false">
+    <div class="setup__hearts" aria-hidden="true">
+      <span style="--x:6%;--d:11s;--s:18px;--dl:0s">♥</span>
+      <span style="--x:20%;--d:14s;--s:26px;--dl:3s">♥</span>
+      <span style="--x:44%;--d:12s;--s:14px;--dl:5s">♥</span>
+      <span style="--x:62%;--d:15s;--s:22px;--dl:1s">♥</span>
+      <span style="--x:80%;--d:11.5s;--s:28px;--dl:4s">♥</span>
+      <span style="--x:93%;--d:13s;--s:16px;--dl:6s">♥</span>
+    </div>
     <div class="setup__card">
+      <div class="setup__head">
+        <div class="setup__badge" aria-hidden="true">🎁</div>
+        <h1 class="setup__title">জন্মদিনের উপহার বানাও</h1>
+        <p class="setup__subtitle">নাম আর বার্তা লেখো, একটা সুন্দর লিংক তৈরি হয়ে যাবে</p>
+      </div>
+
       <p class="setup__label">🌐 ফিল্মের ভাষা</p>
       <div class="lang-row" id="langRow">
         <button class="lang-btn active" type="button" data-lang="bn">বাংলা</button>
@@ -49,8 +63,9 @@
       <p class="setup__label" style="margin-top:18px">🎂 কার জন্য এই উপহার?</p>
       <input class="setup__input" id="nameInput" type="text" placeholder="নাম লেখো…" maxlength="30" autocomplete="off" />
 
-      <p class="setup__label" style="margin-top:18px">💌 Secret Message (Tree tap করলে দেখাবে)</p>
+      <p class="setup__label" style="margin-top:18px">💌 গোপন বার্তা (গাছে ট্যাপ করলে দেখাবে)</p>
       <textarea class="setup__input setup__textarea" id="secretInput" placeholder="তোমার জন্য একটা বিশেষ বার্তা বা চিঠি লেখো…" maxlength="500" rows="4"></textarea>
+      <div class="setup__count" id="msgCount">0/500</div>
 
       <p class="setup__label" style="margin-top:18px">✍️ কার পক্ষ থেকে? (ঐচ্ছিক)</p>
       <input class="setup__input" id="fromInput" type="text" placeholder="তোমার নাম…" maxlength="30" autocomplete="off" />
@@ -59,7 +74,7 @@
       <input class="setup__input" id="bdayInput" type="date" />
       <label class="setup__check">
         <input type="checkbox" id="lockInput" />
-        <span>🔒 ওই তারিখের আগে খুলবে না (তারিখ আগামীর হলে কাজ করবে)</span>
+        <span class="setup__checkText">🔒 ওই তারিখের আগে খুলবে না<small>তারিখ আগামীর হলে কাজ করবে</small></span>
       </label>
 
       <p class="setup__label" style="margin-top:18px">🎨 থিম বেছে নাও</p>
