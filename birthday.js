@@ -1402,18 +1402,71 @@ cakeBlow.addEventListener('click', ()=>{
 });
 candleEls.forEach(c => c.addEventListener('click', ()=> blowCandle(c)));
 
+/* ============================================================
+   ACTION HUB — one button that holds cake / surprises / share / again
+   (the old separate buttons stay in the DOM and are triggered from here)
+   ============================================================ */
+const hub = (() => {
+  const L = {
+    bn: { open:'মেনু', cake:'🎂 কেক', fun:'✨ আরও চমক', wa:'💬 WhatsApp-এ পাঠাও', copy:'🔗 লিংক কপি', share:'📤 শেয়ার করো', again:'🔄 আবার দেখো', copied:'✅ লিংক কপি হয়েছে' },
+    en: { open:'Menu', cake:'🎂 Cake', fun:'✨ More surprises', wa:'💬 Send on WhatsApp', copy:'🔗 Copy link', share:'📤 Share', again:'🔄 Watch again', copied:'✅ Link copied' },
+  };
+  const t = () => L[lang === 'en' ? 'en' : 'bn'];
+  const mk = (tag, cls, txt) => { const e = document.createElement(tag); e.className = cls; if (txt) e.textContent = txt; return e; };
+  const link = () => buildShareURL(userName, bdayDate, currentTheme, shareSecret, shareFrom, shareLock);
+
+  const btn = mk('button', 'hub-btn', '✨'); btn.type = 'button'; btn.hidden = true;
+  btn.setAttribute('aria-label', 'Menu'); btn.setAttribute('aria-expanded', 'false');
+  const back = mk('div', 'hub-back'); back.hidden = true;
+  const list = mk('div', 'hub-list'); list.hidden = true;
+  const toastEl = mk('div', 'hub-toast'); toastEl.hidden = true;
+  const items = [];
+  function add(key, fn, cond){
+    const b = mk('button', 'hub-item'); b.type = 'button';
+    b.addEventListener('click', () => { close(); fn(); });
+    items.push({ key, b, cond }); list.append(b);
+  }
+  let toastTimer = 0;
+  function toast(m){
+    toastEl.textContent = m; toastEl.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastEl.hidden = true; }, 2200);
+  }
+  const canShare = typeof navigator.share === 'function';
+  add('cake',  () => cakeBtn.click());
+  add('fun',   () => { const f = document.querySelector('.x-fab'); if (f) f.click(); });
+  add('wa',    () => { window.open('https://wa.me/?text=' + encodeURIComponent(I18N[lang].share(userName, link())), '_blank'); });
+  add('copy',  () => { copyText(link()).then(() => toast(t().copied)); });
+  add('share', () => { navigator.share({ title: 'Happy Birthday', text: I18N[lang].share(userName, '').trim(), url: link() }).catch(() => {}); }, canShare);
+  add('again', () => replay.click());
+
+  function label(){ items.forEach(({ key, b, cond }) => { b.textContent = t()[key]; b.hidden = cond === false; }); }
+  let isOpen = false;
+  function open(){ label(); isOpen = true; list.hidden = back.hidden = false; btn.textContent = '✕'; btn.setAttribute('aria-expanded', 'true'); btn.classList.add('is-open'); playChime(440, 0.3); }
+  function close(){ isOpen = false; list.hidden = back.hidden = true; btn.textContent = '✨'; btn.setAttribute('aria-expanded', 'false'); btn.classList.remove('is-open'); }
+  btn.addEventListener('click', () => (isOpen ? close() : open()));
+  back.addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) close(); });
+  document.body.append(back, list, btn, toastEl);
+
+  return {
+    show(){ document.body.classList.add('hub-on'); btn.hidden = false; requestAnimationFrame(() => btn.classList.add('is-shown')); },
+    reset(){ close(); document.body.classList.remove('hub-on'); btn.classList.remove('is-shown'); btn.hidden = true; toastEl.hidden = true; },
+  };
+})();
+
 function armReplay(){
   cakeBtn.hidden = false;
   requestAnimationFrame(() => cakeBtn.classList.add('is-shown'));
   replay.hidden = false;
   requestAnimationFrame(() => replay.classList.add('is-shown'));
   extras.show();
+  hub.show();
 }
 
 function resetAll(){
   treeStop(); showWish(false);
   cakeBtn.classList.remove('is-shown'); cakeBtn.hidden = true; closeCake(true);
-  extras.reset();
+  extras.reset(); hub.reset();
   clearInterval(fwTimer); sparks = [];
   window.bdayDone = false; replayArmed = false; confettiFired = false;
   replay.classList.remove('is-shown'); replay.hidden = true;
