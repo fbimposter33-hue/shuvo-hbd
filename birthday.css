@@ -1105,3 +1105,12 @@ body.hub-on .cake-open, body.hub-on .x-fab{ display:none !important; }
 
 /* the share panel is display:flex, which would otherwise beat the hidden attribute */
 .share-panel[hidden], .share-fab[hidden], .replay[hidden]{ display:none !important; }
+
+/* close button on the tree message */
+.secret-toast.show{ pointer-events:auto; padding-top:44px; }
+.secret-x{
+  position:absolute; top:10px; right:12px; width:36px; height:36px; border:0; border-radius:50%;
+  background:rgba(138,53,85,.12); color:#8a3555; font-size:18px; line-height:1; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.secret-x:active{ background:rgba(138,53,85,.28); }
