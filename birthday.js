@@ -610,18 +610,27 @@ let SECRETS = urlMsg
 let secretIdx = 0;
 let secretTimer = null;
 
+const secretX = document.createElement('button');
+secretX.type = 'button'; secretX.className = 'secret-x'; secretX.textContent = '✕';
+secretX.setAttribute('aria-label', 'Close');
+secretToast.append(secretX);
+function hideSecret(){
+  clearTimeout(secretTimer);
+  secretToast.classList.remove('show');
+  setTimeout(()=>{ if(!secretToast.classList.contains('show')) secretToast.hidden = true; }, 450);
+}
+secretX.addEventListener('click', (e)=>{ e.stopPropagation(); hideSecret(); });
+
 function showSecret(){
-  secretToast.querySelector('#secretText').textContent =
-    `${SECRETS[secretIdx % SECRETS.length]}`;
+  const text = `${SECRETS[secretIdx % SECRETS.length]}`;
+  secretToast.querySelector('#secretText').textContent = text;
   secretIdx++;
   secretToast.hidden = false;
   void secretToast.offsetWidth;   // reflow so the pop-in transition plays
   secretToast.classList.add('show');
   clearTimeout(secretTimer);
-  secretTimer = setTimeout(()=>{
-    secretToast.classList.remove('show');
-    setTimeout(()=>{ secretToast.hidden = true; }, 450);
-  }, 3800);
+  // longer messages stay longer (3.8s … 14s); the ✕ closes it any time
+  secretTimer = setTimeout(hideSecret, Math.min(14000, 3800 + text.length * 70));
   playChime(659, 0.5);
 }
 
@@ -665,8 +674,8 @@ shareCopy.addEventListener('click',()=>{
 });
 
 function showShareFab(){
-  shareFab.hidden = false;
-  requestAnimationFrame(()=> shareFab.classList.add('is-shown'));
+  // the old round share button is replaced by the single action hub
+  hub.show();
 }
 
 /* ============================================================
@@ -1421,10 +1430,11 @@ const hub = (() => {
   const list = mk('div', 'hub-list'); list.hidden = true;
   const toastEl = mk('div', 'hub-toast'); toastEl.hidden = true;
   const items = [];
-  function add(key, fn, cond){
+  let full = false;   // cake / surprises / again appear once the film has finished
+  function add(key, fn, cond, late){
     const b = mk('button', 'hub-item'); b.type = 'button';
     b.addEventListener('click', () => { close(); fn(); });
-    items.push({ key, b, cond }); list.append(b);
+    items.push({ key, b, cond, late }); list.append(b);
   }
   let toastTimer = 0;
   function toast(m){
@@ -1432,14 +1442,14 @@ const hub = (() => {
     clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastEl.hidden = true; }, 2200);
   }
   const canShare = typeof navigator.share === 'function';
-  add('cake',  () => cakeBtn.click());
-  add('fun',   () => { const f = document.querySelector('.x-fab'); if (f) f.click(); });
+  add('cake',  () => cakeBtn.click(), true, true);
+  add('fun',   () => { const f = document.querySelector('.x-fab'); if (f) f.click(); }, true, true);
   add('wa',    () => { window.open('https://wa.me/?text=' + encodeURIComponent(I18N[lang].share(userName, link())), '_blank'); });
   add('copy',  () => { copyText(link()).then(() => toast(t().copied)); });
   add('share', () => { navigator.share({ title: 'Happy Birthday', text: I18N[lang].share(userName, '').trim(), url: link() }).catch(() => {}); }, canShare);
-  add('again', () => replay.click());
+  add('again', () => replay.click(), true, true);
 
-  function label(){ items.forEach(({ key, b, cond }) => { b.textContent = t()[key]; b.hidden = cond === false; }); }
+  function label(){ items.forEach(({ key, b, cond, late }) => { b.textContent = t()[key]; b.hidden = cond === false || (late && !full); }); }
   let isOpen = false;
   function open(){ label(); isOpen = true; list.hidden = back.hidden = false; btn.textContent = '✕'; btn.setAttribute('aria-expanded', 'true'); btn.classList.add('is-open'); playChime(440, 0.3); }
   function close(){ isOpen = false; list.hidden = back.hidden = true; btn.textContent = '✨'; btn.setAttribute('aria-expanded', 'false'); btn.classList.remove('is-open'); }
@@ -1450,7 +1460,8 @@ const hub = (() => {
 
   return {
     show(){ document.body.classList.add('hub-on'); btn.hidden = false; requestAnimationFrame(() => btn.classList.add('is-shown')); },
-    reset(){ close(); document.body.classList.remove('hub-on'); btn.classList.remove('is-shown'); btn.hidden = true; toastEl.hidden = true; },
+    unlock(){ full = true; },
+    reset(){ full = false; close(); document.body.classList.remove('hub-on'); btn.classList.remove('is-shown'); btn.hidden = true; toastEl.hidden = true; },
   };
 })();
 
@@ -1460,7 +1471,7 @@ function armReplay(){
   replay.hidden = false;
   requestAnimationFrame(() => replay.classList.add('is-shown'));
   extras.show();
-  hub.show();
+  hub.show(); hub.unlock();
 }
 
 function resetAll(){
