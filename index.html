@@ -70,12 +70,19 @@
       <p class="setup__label" style="margin-top:18px">✍️ কার পক্ষ থেকে? (ঐচ্ছিক)</p>
       <input class="setup__input" id="fromInput" type="text" placeholder="তোমার নাম…" maxlength="30" autocomplete="off" />
 
+      <p class="setup__label" style="margin-top:18px">🎵 গানের লিংক (ঐচ্ছিক)</p>
+      <input class="setup__input" id="songInput" type="url" inputmode="url" placeholder="YouTube বা Spotify লিংক…" autocomplete="off" />
+
       <p class="setup__label" style="margin-top:18px">🎉 জন্মদিন কবে?</p>
       <input class="setup__input" id="bdayInput" type="date" />
       <label class="setup__check">
         <input type="checkbox" id="lockInput" />
         <span class="setup__checkText">🔒 ওই তারিখের আগে খুলবে না<small>তারিখ আগামীর হলে কাজ করবে</small></span>
       </label>
+
+      <p class="setup__label" style="margin-top:18px">🎂 জন্মতারিখ (সালসহ) <span class="setup__opt">— ঐচ্ছিক</span></p>
+      <input class="setup__input" id="dobInput" type="date" />
+      <p class="setup__hint">দিলে "তুমি এতদিন" আর জন্মফুল-পাথর কাজ করবে</p>
 
       <p class="setup__label" style="margin-top:18px">🎨 থিম বেছে নাও</p>
       <div class="theme-row" id="themeRow">
@@ -85,6 +92,7 @@
         <button class="theme-btn"        data-theme="gold"  title="Gold">✨</button>
         <button class="theme-btn"        data-theme="green" title="Green">🍃</button>
         <button class="theme-btn"        data-theme="night" title="Night">🌙</button>
+        <button class="theme-btn"        data-theme="auto"  title="Auto (day / night)">🌗</button>
       </div>
 
       <div class="link-preview" id="linkPreview" hidden>

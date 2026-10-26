@@ -11,6 +11,7 @@
    ============================================================ */
 
 import gsap from 'gsap';
+import { initExtras } from './extras.js';
 
 /* ============================================================
    URL-BASED PERSONALISATION
@@ -24,6 +25,9 @@ const urlDate  = params.get('date') || '';
 const urlMsg   = params.get('msg')  || '';
 const urlFrom  = params.get('from') || '';
 const urlLock  = params.get('lock') === '1';
+const urlSong  = params.get('song') || '';
+const urlDob   = params.get('dob')  || '';
+const isoDate  = (v)=> /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : '';
 const isViewer = !!urlName;   // true = received a link, skip setup
 
 /* ============================================================
@@ -88,9 +92,15 @@ setLang(lang);
    ============================================================ */
 let currentTheme = params.get('theme') || localStorage.getItem('hbd-theme') || 'pink';
 
+// 'auto' = light pink by day, deep night theme in the evening (viewer's local time)
+function resolveTheme(t){
+  if(t !== 'auto') return t;
+  const h = new Date().getHours();
+  return (h >= 19 || h < 6) ? 'night' : 'pink';
+}
 function applyTheme(t){
   currentTheme = t;
-  document.documentElement.setAttribute('data-theme', t);
+  document.documentElement.setAttribute('data-theme', resolveTheme(t));
   localStorage.setItem('hbd-theme', t);
   document.querySelectorAll('.theme-btn').forEach(b=>{
     b.classList.toggle('active', b.dataset.theme === t);
@@ -114,6 +124,8 @@ let bdayDate  = '';
 let shareSecret = urlMsg;
 let shareFrom   = urlFrom;
 let shareLock   = urlLock;
+let shareSong   = /^https?:\/\//i.test(urlSong) ? urlSong : '';
+let shareDob    = isoDate(urlDob);
 
 function buildShareURL(name, date, theme, secret, from, lock){
   const base = location.origin + location.pathname;
@@ -125,6 +137,8 @@ function buildShareURL(name, date, theme, secret, from, lock){
   if(from)   p.set('from', from);
   if(lock && date) p.set('lock', '1');
   if(lang === 'en') p.set('lang', 'en');
+  if(shareSong) p.set('song', shareSong);
+  if(shareDob)  p.set('dob', shareDob);
   return base + '?' + p.toString();
 }
 
@@ -140,7 +154,9 @@ function personalise(name, date){
   if(urlMsg || (document.getElementById('secretInput')?.value||'').trim()){
     SECRETS = [secretVal];
   }
-  if(bdayDate) showCountdown(bdayDate);
+  // countdown: the occasion date if given, otherwise the birth date (month + day)
+  const cdDate = bdayDate || shareDob;
+  if(cdDate) showCountdown(cdDate);
 }
 
 // Fill every piece of film text in the chosen language and re-split the headline.
@@ -220,6 +236,9 @@ function generateLink(){
   const secret = (document.getElementById('secretInput')?.value || '').trim();
   const lockOn = !!document.getElementById('lockInput')?.checked;
   shareLock = lockOn;
+  const songRaw = (document.getElementById('songInput')?.value || '').trim();
+  shareSong = /^https?:\/\//i.test(songRaw) ? songRaw : '';
+  shareDob = isoDate(document.getElementById('dobInput')?.value || '');
   const link   = buildShareURL(name, date, currentTheme, secret, (document.getElementById('fromInput')?.value || '').trim(), lockOn);
   // Update SECRETS for own preview
   shareSecret = secret;
@@ -281,7 +300,7 @@ document.querySelectorAll('.lang-btn').forEach(btn=>{
   });
 });
 ['input','change'].forEach(ev=>{
-  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput'), document.getElementById('lockInput')].forEach(el=>{
+  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput'), document.getElementById('lockInput'), document.getElementById('songInput'), document.getElementById('dobInput')].forEach(el=>{
     el && el.addEventListener(ev, ()=>{
       if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
     });
@@ -1388,11 +1407,13 @@ function armReplay(){
   requestAnimationFrame(() => cakeBtn.classList.add('is-shown'));
   replay.hidden = false;
   requestAnimationFrame(() => replay.classList.add('is-shown'));
+  extras.show();
 }
 
 function resetAll(){
   treeStop(); showWish(false);
   cakeBtn.classList.remove('is-shown'); cakeBtn.hidden = true; closeCake(true);
+  extras.reset();
   clearInterval(fwTimer); sparks = [];
   window.bdayDone = false; replayArmed = false; confettiFired = false;
   replay.classList.remove('is-shown'); replay.hidden = true;
@@ -1445,10 +1466,30 @@ if (reduceMotion){
 }
 
 /* ============================================================
+   EXTRAS — the ✨ "আরও চমক" menu (see extras.js)
+   ============================================================ */
+const extras = initExtras({
+  getName:    () => userName,
+  getDate:    () => bdayDate,
+  getDob:     () => shareDob,
+  getMessage: () => shareSecret,
+  getFrom:    () => shareFrom,
+  getSong:    () => shareSong,
+  chime:      playChime,
+  piano:      playPiano,
+  confetti:   launchConfetti,
+  fireworks:  launchFireworks,
+  petals:     () => { for (let i = 0; i < 30; i++) spawnPetal(); },
+  openCake:   openCake,
+});
+
+/* ============================================================
    DEVELOPER CREDIT + PROFILE CARD
    Fill in DEV.links to show buttons (leave empty to hide them).
    Optional profile photo: put it at  public/developer.jpg
    ============================================================ */
+const BASE_URL = (import.meta.env && import.meta.env.BASE_URL) || './';
+
 const DEV = {
   name:   'Shuvo Ahmed',
   role:   'Developer',
@@ -1480,7 +1521,7 @@ const DEV = {
   });
   img.onload  = ()=>{ img.hidden = false; initial.hidden = true; };
   img.onerror = ()=>{ img.hidden = true; };
-  img.src = import.meta.env.BASE_URL + 'developer.jpg';
+  img.src = BASE_URL + 'developer.jpg';
 
   const open  = ()=>{ modal.hidden = false; playChime(587, 0.35); };
   const close = ()=>{ modal.hidden = true; };
@@ -1514,7 +1555,7 @@ installBtns.forEach(b=>{
 });
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js').catch(()=>{});
+    navigator.serviceWorker.register(BASE_URL + 'sw.js').catch(()=>{});
   });
 }
 

@@ -1026,6 +1026,7 @@ html[data-lang="bn"] .wish__hero{
 .theme-btn[data-theme="gold"]  { background:linear-gradient(145deg,#fff1cf,#f6b43a); }
 .theme-btn[data-theme="green"] { background:linear-gradient(145deg,#dcf9e7,#52d88a); }
 .theme-btn[data-theme="night"] { background:linear-gradient(145deg,#d9ddff,#6d78f5); }
+.theme-btn[data-theme="auto"]  { background:linear-gradient(90deg,#fff1cf 50%,#6d78f5 50%); }
 .theme-btn.active{ transform:scale(1.1); box-shadow:0 0 0 2px #d94070, 0 10px 20px -8px rgba(160,20,60,.6); }
 
 /* lock switch */
@@ -1061,3 +1062,6 @@ html[data-lang="bn"] .wish__hero{
 
 .link-box{ background:#fff; border:1.5px dashed #eab6c6; border-radius:12px; max-height:92px; overflow-y:auto; }
 .setup .share-btn{ font-weight:600; }
+
+.setup__opt{ font-weight:400; opacity:.65; font-size:13.5px; }
+.setup__hint{ margin:6px 2px 0; font-size:12.5px; color:#b07a8c; }
