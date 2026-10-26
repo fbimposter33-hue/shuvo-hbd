@@ -1102,3 +1102,6 @@ body.hub-on .cake-open, body.hub-on .x-fab{ display:none !important; }
   background:rgba(60,20,40,.92); color:#fff; padding:10px 18px; border-radius:999px;
   font:500 15px "Hind Siliguri",system-ui,sans-serif; animation:hubIn .2s ease; white-space:nowrap;
 }
+
+/* the share panel is display:flex, which would otherwise beat the hidden attribute */
+.share-panel[hidden], .share-fab[hidden], .replay[hidden]{ display:none !important; }
