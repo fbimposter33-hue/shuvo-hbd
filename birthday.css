@@ -1065,3 +1065,40 @@ html[data-lang="bn"] .wish__hero{
 
 .setup__opt{ font-weight:400; opacity:.65; font-size:13.5px; }
 .setup__hint{ margin:6px 2px 0; font-size:12.5px; color:#b07a8c; }
+
+/* --- ACTION HUB: one button instead of five ------------------ */
+body.hub-on .share-fab, body.hub-on .share-panel, body.hub-on .replay,
+body.hub-on .cake-open, body.hub-on .x-fab{ display:none !important; }
+
+.hub-btn{
+  position:fixed; right:16px; bottom:calc(58px + env(safe-area-inset-bottom, 0px)); z-index:246;
+  width:58px; height:58px; border:0; border-radius:50%; cursor:pointer;
+  font-size:24px; line-height:1; color:#fff;
+  background:linear-gradient(135deg,#ff7aa8,#d6336c);
+  box-shadow:0 10px 26px -6px rgba(214,51,108,.65), 0 0 0 4px rgba(255,255,255,.55);
+  opacity:0; transform:scale(.6); transition:opacity .4s, transform .25s, background .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.hub-btn.is-shown{ opacity:1; transform:scale(1); }
+.hub-btn.is-open{ background:linear-gradient(135deg,#7a4a5e,#4e2a3c); font-size:20px; }
+.hub-btn:active{ transform:scale(.92); }
+.hub-btn[hidden], .hub-list[hidden], .hub-back[hidden], .hub-toast[hidden], .hub-item[hidden]{ display:none !important; }
+.hub-back{ position:fixed; inset:0; z-index:244; background:rgba(60,20,40,.28); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); }
+.hub-list{
+  position:fixed; right:16px; bottom:calc(128px + env(safe-area-inset-bottom, 0px)); z-index:247;
+  display:flex; flex-direction:column; align-items:flex-end; gap:10px;
+  animation:hubIn .22s ease;
+}
+@keyframes hubIn{ from{opacity:0; transform:translateY(12px) scale(.96)} to{opacity:1; transform:none} }
+.hub-item{
+  border:0; cursor:pointer; padding:12px 20px; border-radius:999px; min-width:200px; text-align:left;
+  font:600 16px/1.2 "Hind Siliguri","Cormorant Garamond",system-ui,sans-serif; color:#5a2740;
+  background:rgba(255,250,252,.97); box-shadow:0 8px 22px -8px rgba(90,39,64,.45);
+  -webkit-tap-highlight-color:transparent;
+}
+.hub-item:active{ transform:scale(.97); background:#ffe3ec; }
+.hub-toast{
+  position:fixed; left:50%; bottom:calc(132px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); z-index:300;
+  background:rgba(60,20,40,.92); color:#fff; padding:10px 18px; border-radius:999px;
+  font:500 15px "Hind Siliguri",system-ui,sans-serif; animation:hubIn .2s ease; white-space:nowrap;
+}
