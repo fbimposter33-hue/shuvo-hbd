@@ -27,6 +27,10 @@ const urlFrom  = params.get('from') || '';
 const urlLock  = params.get('lock') === '1';
 const urlSong  = params.get('song') || '';
 const urlDob   = params.get('dob')  || '';
+const urlStyle = params.get('style') || '';
+const cleanAlbum = (v)=> (v || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40);
+const urlAlbum = cleanAlbum(params.get('album'));
+let filmStyle  = (urlStyle === 'stars' || urlStyle === 'flowers') ? urlStyle : 'hearts';
 const isoDate  = (v)=> /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : '';
 const isViewer = !!urlName;   // true = received a link, skip setup
 
@@ -126,6 +130,7 @@ let shareFrom   = urlFrom;
 let shareLock   = urlLock;
 let shareSong   = /^https?:\/\//i.test(urlSong) ? urlSong : '';
 let shareDob    = isoDate(urlDob);
+let shareAlbum  = urlAlbum;
 
 function buildShareURL(name, date, theme, secret, from, lock){
   const base = location.origin + location.pathname;
@@ -139,6 +144,8 @@ function buildShareURL(name, date, theme, secret, from, lock){
   if(lang === 'en') p.set('lang', 'en');
   if(shareSong) p.set('song', shareSong);
   if(shareDob)  p.set('dob', shareDob);
+  if(filmStyle !== 'hearts') p.set('style', filmStyle);
+  if(shareAlbum) p.set('album', shareAlbum);
   return base + '?' + p.toString();
 }
 
@@ -239,6 +246,7 @@ function generateLink(){
   const songRaw = (document.getElementById('songInput')?.value || '').trim();
   shareSong = /^https?:\/\//i.test(songRaw) ? songRaw : '';
   shareDob = isoDate(document.getElementById('dobInput')?.value || '');
+  shareAlbum = cleanAlbum(document.getElementById('albumInput')?.value);
   const link   = buildShareURL(name, date, currentTheme, secret, (document.getElementById('fromInput')?.value || '').trim(), lockOn);
   // Update SECRETS for own preview
   shareSecret = secret;
@@ -300,7 +308,7 @@ document.querySelectorAll('.lang-btn').forEach(btn=>{
   });
 });
 ['input','change'].forEach(ev=>{
-  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput'), document.getElementById('lockInput'), document.getElementById('songInput'), document.getElementById('dobInput')].forEach(el=>{
+  [nameInput, bdayInput, document.getElementById('secretInput'), document.getElementById('fromInput'), document.getElementById('lockInput'), document.getElementById('songInput'), document.getElementById('dobInput'), document.getElementById('albumInput')].forEach(el=>{
     el && el.addEventListener(ev, ()=>{
       if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
     });
@@ -311,6 +319,52 @@ document.querySelectorAll('.theme-btn').forEach(btn=>{
     if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; }
   });
 });
+/* --- film style chips + ready-made messages --------------- */
+function setupChanged(){ if(linkGenerated){ linkGenerated = false; setupGo.textContent = 'লিংক তৈরি করো ✨'; } }
+document.querySelectorAll('.style-btn').forEach(btn=>{
+  btn.classList.toggle('active', btn.dataset.style === filmStyle);
+  btn.addEventListener('click', ()=>{
+    setFilmStyle(btn.dataset.style);
+    document.querySelectorAll('.style-btn').forEach(b=> b.classList.toggle('active', b === btn));
+    setupChanged();
+  });
+});
+
+const TEMPLATES = {
+  friend:  { theme:'blue',   bn:'শুভ জন্মদিন{n}! 🎉 তুমি আমার জীবনের সেরা বন্ধুদের একজন। তোমার হাসিটা যেন কখনো না থামে। আজকের দিনটা তোমার মতোই দারুণ হোক! 🎂',
+                             en:"Happy Birthday{n}! 🎉 You're one of the best friends I could ask for. May your smile never fade. Wishing you a day as wonderful as you are! 🎂" },
+  love:    { theme:'pink',   bn:'শুভ জন্মদিন{n}! 💗 তোমার হাসিতেই আমার সব ভালো লাগা। পাশে থাকার জন্য ধন্যবাদ। আগামী প্রতিটা বছর আরও সুন্দর হোক, আমি সবসময় তোমার পাশে আছি।',
+                             en:"Happy Birthday{n}! 💗 Every good feeling I have starts with your smile. Thank you for being by my side. May every coming year be even more beautiful, and I'll be right here with you." },
+  mom:     { theme:'gold',   bn:'শুভ জন্মদিন, মা! 💛 তোমার ভালোবাসা আর দোয়াতেই আমি আজ এখানে। তুমি সবসময় সুস্থ আর হাসিখুশি থেকো। অনেক অনেক ভালোবাসি তোমাকে!',
+                             en:'Happy Birthday, Mom! 💛 Everything I am today is because of your love and prayers. Stay healthy and happy always. I love you so much!' },
+  dad:     { theme:'green',  bn:'শুভ জন্মদিন, বাবা! 🧡 তোমার কষ্ট আর ভালোবাসার জন্যই আমরা আজ এত দূর এসেছি। সবসময় সুস্থ থেকো, আমাদের মাথার ওপর ছায়া হয়ে থেকো।',
+                             en:'Happy Birthday, Dad! 🧡 Your hard work and love brought us this far. Stay well, and keep being the shade over our heads.' },
+  sibling: { theme:'purple', bn:'শুভ জন্মদিন{n}! 🧸 ঝগড়া-মারামারির মধ্যেও তুমি আমার সবচেয়ে আপন। সবসময় ভালো থেকো, আর আজ ট্রিট দিতে ভুলো না! 😄',
+                             en:"Happy Birthday{n}! 🧸 Through all the fights and teasing, you're still my closest. Stay happy always, and don't forget the treat today! 😄" },
+  spouse:  { theme:'gold',   bn:'শুভ জন্মদিন{n}! 💍 তুমি আমার প্রতিটা দিনকে সুন্দর করে দাও। তোমার সাথে কাটানো প্রতিটা বছর আমার জীবনের সেরা উপহার। ভালোবাসি, আজীবন।',
+                             en:'Happy Birthday{n}! 💍 You make every single day more beautiful. Every year with you is the best gift of my life. I love you, always.' },
+};
+let lastTpl = '';
+document.querySelectorAll('.tpl-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const ta = document.getElementById('secretInput'), t = TEMPLATES[btn.dataset.tpl];
+    if(!ta || !t) return;
+    if(ta.value.trim() && ta.value !== lastTpl &&
+       !confirm(lang === 'en' ? 'Replace what you wrote?' : 'আগের লেখা বদলে যাবে। ঠিক আছে?')) return;
+    const nm = nameInput.value.trim();
+    const text = (lang === 'en' ? t.en : t.bn).replace('{n}', nm ? ' ' + nm : '');
+    ta.value = text.slice(0, ta.maxLength > 0 ? ta.maxLength : 500);
+    lastTpl = ta.value;
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    applyTheme(t.theme);
+    document.querySelectorAll('.tpl-btn').forEach(b=> b.classList.toggle('active', b === btn));
+    setupChanged();
+  });
+});
+document.getElementById('secretInput')?.addEventListener('input', (e)=>{
+  if(e.target.value !== lastTpl) document.querySelectorAll('.tpl-btn').forEach(b=> b.classList.remove('active'));
+});
+
 {
   const msgBox = document.getElementById('secretInput');
   const msgCount = document.getElementById('msgCount');
@@ -755,11 +809,29 @@ function shade(hex, amt){
   return `rgb(${r | 0},${g | 0},${b | 0})`;
 }
 
-const BLOSSOM = [
-  { c0:'#fff0f4', c1:'#ffb3c8' }, { c0:'#ffeef5', c1:'#ff8fb4' },
-  { c0:'#fff4e8', c1:'#ffcf9a' }, { c0:'#fff6f0', c1:'#ffbfa0' },
-  { c0:'#fdf0ff', c1:'#e8a0ff' }, { c0:'#f0f8ff', c1:'#a0c8ff' },
-];
+const BLOSSOM_PALETTES = {
+  hearts: [
+    { c0:'#fff0f4', c1:'#ffb3c8' }, { c0:'#ffeef5', c1:'#ff8fb4' },
+    { c0:'#fff4e8', c1:'#ffcf9a' }, { c0:'#fff6f0', c1:'#ffbfa0' },
+    { c0:'#fdf0ff', c1:'#e8a0ff' }, { c0:'#f0f8ff', c1:'#a0c8ff' },
+  ],
+  stars: [
+    { c0:'#fffbea', c1:'#ffd966' }, { c0:'#fff8dc', c1:'#ffc94d' },
+    { c0:'#f4f8ff', c1:'#b9d3ff' }, { c0:'#f7efff', c1:'#d2b4ff' },
+    { c0:'#ffffff', c1:'#ffe9a8' }, { c0:'#eef6ff', c1:'#9fc4ff' },
+  ],
+  flowers: [
+    { c0:'#fff3f7', c1:'#ffb6cd' }, { c0:'#fffaf0', c1:'#ffe08a' },
+    { c0:'#ffffff', c1:'#ffd1dc' }, { c0:'#fdf0ff', c1:'#e2a8ff' },
+    { c0:'#fff6ee', c1:'#ffc09a' }, { c0:'#f2fbff', c1:'#aee0ff' },
+  ],
+};
+let BLOSSOM = BLOSSOM_PALETTES[filmStyle];
+function setFilmStyle(s){
+  filmStyle = BLOSSOM_PALETTES[s] ? s : 'hearts';
+  BLOSSOM = BLOSSOM_PALETTES[filmStyle];
+  buildSprites();
+}
 
 const T = {
   trunkStart: 0.1,
@@ -782,6 +854,32 @@ function heartShape(c, cx, cy, w, h){
   c.closePath();
 }
 
+// the "petal" that fills the tree: heart (default), star or five-petal flower
+function starShape(c, cx, cy, w, h){
+  const mx = cx, my = cy + h * 0.32, R = w * 0.52, r = R * 0.5;
+  c.beginPath();
+  for (let i = 0; i < 10; i++){
+    const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r : R;
+    const px = mx + Math.cos(a) * d, py = my + Math.sin(a) * d;
+    if (i) c.lineTo(px, py); else c.moveTo(px, py);
+  }
+  c.closePath();
+}
+function flowerShape(c, cx, cy, w, h){
+  const mx = cx, my = cy + h * 0.3, d = w * 0.24, pr = w * 0.22;
+  c.beginPath();
+  for (let i = 0; i < 5; i++){
+    const a = -Math.PI / 2 + i * Math.PI * 2 / 5, px = mx + Math.cos(a) * d, py = my + Math.sin(a) * d;
+    c.moveTo(px + pr, py); c.arc(px, py, pr, 0, Math.PI * 2);
+  }
+  c.moveTo(mx + pr, my); c.arc(mx, my, pr, 0, Math.PI * 2);
+}
+function blossomShape(c, cx, cy, w, h){
+  if (filmStyle === 'stars') starShape(c, cx, cy, w, h);
+  else if (filmStyle === 'flowers') flowerShape(c, cx, cy, w, h);
+  else heartShape(c, cx, cy, w, h);
+}
+
 function makeBlossom(b, soft){
   const SS = 128;
   const { c0, c1 } = b;
@@ -791,12 +889,12 @@ function makeBlossom(b, soft){
   c.save();
   c.shadowColor = 'rgba(150,38,72,0.32)';
   c.shadowBlur = SS * 0.085; c.shadowOffsetY = SS * 0.05;
-  c.fillStyle = c1; heartShape(c, x, top, w, h); c.fill();
+  c.fillStyle = c1; blossomShape(c, x, top, w, h); c.fill();
   c.restore();
   const g = c.createRadialGradient(x - w * 0.20, top + h * 0.20, h * 0.04, x, top + h * 0.42, h * 0.92);
   g.addColorStop(0, c0); g.addColorStop(0.55, c1); g.addColorStop(1, shade(c1, -26));
-  heartShape(c, x, top, w, h); c.fillStyle = g; c.fill();
-  c.save(); heartShape(c, x, top, w, h); c.clip();
+  blossomShape(c, x, top, w, h); c.fillStyle = g; c.fill();
+  c.save(); blossomShape(c, x, top, w, h); c.clip();
   const g2 = c.createLinearGradient(0, top, 0, top + h);
   g2.addColorStop(0, 'rgba(255,255,255,0)');
   g2.addColorStop(0.65, 'rgba(110,16,46,0)');
@@ -1367,7 +1465,7 @@ const cakeTitle   = document.getElementById('cakeTitle');
 const cakeHint    = document.getElementById('cakeHint');
 const cakeBlow    = document.getElementById('cakeBlow');
 const cakeClose   = document.getElementById('cakeClose');
-const candleEls   = [...document.querySelectorAll('#cakeSvg .candle')];
+let candleEls     = [...document.querySelectorAll('#cakeSvg .candle')];
 let cakeDone = false, cakeHideTimer = 0;
 
 const litCandles = ()=> candleEls.filter(c => !c.classList.contains('out'));
@@ -1386,12 +1484,46 @@ function blowCandle(c){
   playChime(300 + Math.random() * 200, 0.25);
   checkCake();
 }
+/* number of candles = the age (needs a birth date). 1–9 exact, older → 9 shown. */
+function candleAge(){
+  const today = new Date();
+  const ymd = (s)=> /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? s : '';
+  let dob = ymd(shareDob), refY = today.getFullYear();
+  if(dob && ymd(bdayDate)) refY = +bdayDate.slice(0, 4);
+  if(!dob && ymd(bdayDate) && +bdayDate.slice(0, 4) < today.getFullYear()) dob = bdayDate;   // older links: one date = birth date
+  if(!dob) return 0;
+  const a = refY - (+dob.slice(0, 4));
+  return (a >= 1 && a <= 120) ? a : 0;
+}
+const CANDLE_COLORS = ['#7fc8ff', '#ffd36a', '#ff7fa6', '#b99bff', '#7fe0b0'];
+function buildCandles(n){
+  const svg = document.getElementById('cakeSvg'), NS = 'http://www.w3.org/2000/svg';
+  svg.querySelectorAll('.candle').forEach(e => e.remove());
+  const sp = n <= 5 ? 22 : Math.min(22, 112 / (n - 1));
+  const mk = (tag, attrs, parent)=>{ const e = document.createElementNS(NS, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+  candleEls = [];
+  for(let i = 0; i < n; i++){
+    const x = 120 + (i - (n - 1) / 2) * sp;
+    const g = mk('g', { class: 'candle' }, svg);
+    mk('rect', { x: x - sp / 2, y: 30, width: sp, height: 60, fill: 'transparent' }, g);
+    mk('rect', { x: x - 4, y: 58, width: 8, height: 30, rx: 3, fill: CANDLE_COLORS[i % CANDLE_COLORS.length] }, g);
+    const f = mk('g', { class: 'flame' }, g);
+    mk('ellipse', { cx: x, cy: 49, rx: 5.5, ry: 10, fill: '#ffb52e' }, f);
+    mk('ellipse', { cx: x, cy: 52, rx: 2.6, ry: 5, fill: '#fff3b0' }, f);
+    g.addEventListener('click', ()=> blowCandle(g));
+    candleEls.push(g);
+  }
+}
 function openCake(){
   clearTimeout(cakeHideTimer);
   cakeDone = false;
-  candleEls.forEach(c => c.classList.remove('out'));
+  const age = candleAge();
+  buildCandles(age ? Math.min(age, 9) : 5);
   cakeTitle.textContent = 'মোমবাতিতে ফুঁ দাও 🎂';
-  cakeHint.textContent = 'মোমবাতিতে ট্যাপ করো, নয়তো নিচের বাটন চাপো';
+  const bnA = String(age).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+  cakeHint.textContent = !age ? 'মোমবাতিতে ট্যাপ করো, নয়তো নিচের বাটন চাপো'
+    : age <= 9 ? `তোমার ${bnA} বছর — ${bnA}টা মোমবাতি। ট্যাপ করো বা নিচের বাটন চাপো`
+    : `তোমার ${bnA} বছর! জায়গা কম বলে ৯টা মোমবাতি দেখাচ্ছি 😄 ট্যাপ করো`;
   cakeBlow.hidden = false;
   cakeOverlay.hidden = false;
   void cakeOverlay.offsetWidth;
@@ -1409,7 +1541,6 @@ cakeClose.addEventListener('click', ()=> closeCake());
 cakeBlow.addEventListener('click', ()=>{
   litCandles().forEach((c, i)=> setTimeout(()=> blowCandle(c), i * 220));
 });
-candleEls.forEach(c => c.addEventListener('click', ()=> blowCandle(c)));
 
 /* ============================================================
    ACTION HUB — one button that holds cake / surprises / share / again
@@ -1539,6 +1670,7 @@ const extras = initExtras({
   getMessage: () => shareSecret,
   getFrom:    () => shareFrom,
   getSong:    () => shareSong,
+  getAlbum:   () => shareAlbum,
   chime:      playChime,
   piano:      playPiano,
   confetti:   launchConfetti,
