@@ -661,6 +661,58 @@ export function initExtras(ctx){
   }
 
   /* ============================================================
+     POLAROIDS — photos come from public/photos/photos.json
+     (or public/photos/<album>/photos.json when the link has &album=…)
+     ============================================================ */
+  let photos = [], photosTried = false;
+  const BASE = (() => { try { return (import.meta.env && import.meta.env.BASE_URL) || './'; } catch (_) { return './'; } })();
+  async function loadPhotos(){
+    if (photosTried) return;
+    photosTried = true;
+    const album = String((ctx.getAlbum && ctx.getAlbum()) || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40);
+    const dir = BASE + 'photos/' + (album ? album + '/' : '');
+    try {
+      const r = await fetch(dir + 'photos.json', { cache: 'no-store' });
+      if (!r.ok) return;
+      const j = await r.json();
+      if (!Array.isArray(j)) return;
+      photos = j.slice(0, 12).map((it) => {
+        const o = typeof it === 'string' ? { src: it } : (it || {});
+        let src = String(o.src || '');
+        if (/^https?:\/\//i.test(src)) src = safeUrl(src);
+        else if (/^[\w\-. ()%/]+$/.test(src) && !src.includes('..')) src = dir + src;
+        else src = '';
+        return src ? { src, cap: String(o.caption || o.cap || '').slice(0, 80) } : null;
+      }).filter(Boolean);
+    } catch (_) { /* no photos: the tile simply does not appear */ }
+  }
+
+  function runPolaroids(host){
+    const wrap = el('div', 'xpo-wrap');
+    wrap.append(el('p', 'xp-h', `${name()}-এর স্মৃতি 📸`), el('p', 'xp-sub', 'ছবিতে টোকা দাও'));
+    const board = el('div', 'xpo-board');
+    let z = 5;
+    photos.forEach((p, i) => {
+      const card = el('button', 'xpo-card'); card.type = 'button';
+      card.style.setProperty('--r', rand(-7, 7).toFixed(1) + 'deg');
+      card.style.animationDelay = (i * 0.35) + 's';
+      const img = el('img', 'xpo-img');
+      img.alt = p.cap || ''; img.decoding = 'async'; img.src = p.src;
+      img.style.animationDelay = (i * 0.35 + 0.6) + 's';
+      img.addEventListener('error', () => card.remove());
+      card.append(img, el('span', 'xpo-cap', p.cap));
+      card.addEventListener('click', () => {
+        const on = card.classList.toggle('front');
+        card.style.zIndex = on ? String(++z) : '';
+        api.chime(600 + i * 30, 0.2);
+      });
+      board.append(card);
+    });
+    wrap.append(board);
+    host.append(wrap);
+  }
+
+  /* ============================================================
      MENU
      ============================================================ */
   function tiles(){
@@ -682,6 +734,7 @@ export function initExtras(ctx){
       { icon: '💝', label: 'প্রশংসার কার্ড', title: '💝 প্রশংসার কার্ড',  run: runCompliments },
       { icon: '📳', label: 'ফোন ঝাঁকাও',    action: () => { closeAll(); enableShake(); } },
     ];
+    if (photos.length) list.push({ icon: '📸', label: 'স্মৃতির পোলারয়েড', title: '📸 স্মৃতির পোলারয়েড', run: runPolaroids });
     const s = song();
     if (s) list.push({ icon: '🎵', label: 'এই গানটা তোমার জন্য', href: s });
     return list;
@@ -740,11 +793,13 @@ export function initExtras(ctx){
 
   return {
     show(){
+      loadPhotos();
       fab.hidden = false;
       requestAnimationFrame(() => fab.classList.add('is-shown'));
       trailOn = true;
     },
     reset(){
+      photos = []; photosTried = false;
       closeAll();
       fab.classList.remove('is-shown');
       fab.hidden = true;
