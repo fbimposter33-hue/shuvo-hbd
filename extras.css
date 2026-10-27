@@ -248,3 +248,19 @@
   .x-fab.is-shown{ animation:none; }
   .xb-balloon, .xn-lantern{ animation-duration:12s !important; }
 }
+
+/* --- polaroids -------------------------------------------- */
+.xpo-wrap{ position:absolute; inset:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 12px 48px; text-align:center; }
+.xpo-board{ display:flex; flex-wrap:wrap; justify-content:center; margin-top:10px; }
+.xpo-card{
+  position:relative; width:min(44vw, 180px); margin:-4px -6px 16px; padding:8px 8px 6px; border:0; border-radius:4px;
+  background:#fffdf8; box-shadow:0 10px 22px -8px rgba(60,20,40,.5); cursor:pointer; z-index:1;
+  transform:rotate(var(--r, 0deg)); transition:transform .3s ease;
+  animation:xpo-drop .7s cubic-bezier(.2,1.2,.4,1) backwards;
+  -webkit-tap-highlight-color:transparent;
+}
+.xpo-card.front{ transform:rotate(0deg) scale(1.28); }
+.xpo-img{ display:block; width:100%; aspect-ratio:1; object-fit:cover; background:#e9dfd8; animation:xpo-dev 2.6s ease backwards; }
+.xpo-cap{ display:block; min-height:1.3em; margin-top:7px; font:600 14px/1.25 "Segoe Script","Bradley Hand","Hind Siliguri",cursive; color:#6a3a4e; }
+@keyframes xpo-drop{ from{ opacity:0; transform:translateY(-70px) rotate(calc(var(--r, 0deg) * 3)); } }
+@keyframes xpo-dev{ from{ filter:brightness(.25) saturate(0); } }
