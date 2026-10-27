@@ -63,6 +63,16 @@
       <p class="setup__label" style="margin-top:18px">🎂 কার জন্য এই উপহার?</p>
       <input class="setup__input" id="nameInput" type="text" placeholder="নাম লেখো…" maxlength="30" autocomplete="off" />
 
+      <p class="setup__label" style="margin-top:18px">✨ রেডিমেড বার্তা <span class="setup__opt">— বেছে নিলে নিচে বসে যাবে</span></p>
+      <div class="tpl-row" id="tplRow">
+        <button class="tpl-btn" type="button" data-tpl="friend">💙 বন্ধু</button>
+        <button class="tpl-btn" type="button" data-tpl="love">💗 প্রিয়জন</button>
+        <button class="tpl-btn" type="button" data-tpl="mom">💛 মা</button>
+        <button class="tpl-btn" type="button" data-tpl="dad">🧡 বাবা</button>
+        <button class="tpl-btn" type="button" data-tpl="sibling">🧸 ভাই-বোন</button>
+        <button class="tpl-btn" type="button" data-tpl="spouse">💍 স্বামী-স্ত্রী</button>
+      </div>
+
       <p class="setup__label" style="margin-top:18px">💌 গোপন বার্তা (গাছে ট্যাপ করলে দেখাবে)</p>
       <textarea class="setup__input setup__textarea" id="secretInput" placeholder="তোমার জন্য একটা বিশেষ বার্তা বা চিঠি লেখো…" maxlength="500" rows="4"></textarea>
       <div class="setup__count" id="msgCount">0/500</div>
@@ -72,6 +82,10 @@
 
       <p class="setup__label" style="margin-top:18px">🎵 গানের লিংক (ঐচ্ছিক)</p>
       <input class="setup__input" id="songInput" type="url" inputmode="url" placeholder="YouTube বা Spotify লিংক…" autocomplete="off" />
+
+      <p class="setup__label" style="margin-top:18px">📸 ছবির অ্যালবাম <span class="setup__opt">— ঐচ্ছিক</span></p>
+      <input class="setup__input" id="albumInput" type="text" placeholder="যেমন: rima" maxlength="40" autocomplete="off" autocapitalize="none" spellcheck="false" />
+      <p class="setup__hint">public/photos/অ্যালবাম-নাম/ ফোল্ডারে ছবি রাখলে "স্মৃতির পোলারয়েড" চালু হবে। ফাঁকা রাখলে public/photos/ ফোল্ডার ধরবে</p>
 
       <p class="setup__label" style="margin-top:18px">🎉 জন্মদিন কবে?</p>
       <input class="setup__input" id="bdayInput" type="date" />
@@ -83,6 +97,13 @@
       <p class="setup__label" style="margin-top:18px">🎂 জন্মতারিখ (সালসহ) <span class="setup__opt">— ঐচ্ছিক</span></p>
       <input class="setup__input" id="dobInput" type="date" />
       <p class="setup__hint">দিলে "তুমি এতদিন" আর জন্মফুল-পাথর কাজ করবে</p>
+
+      <p class="setup__label" style="margin-top:18px">🎬 ফিল্মের স্টাইল</p>
+      <div class="style-row" id="styleRow">
+        <button class="style-btn active" type="button" data-style="hearts">💗 হৃদয়</button>
+        <button class="style-btn" type="button" data-style="stars">⭐ তারা</button>
+        <button class="style-btn" type="button" data-style="flowers">🌸 ফুল</button>
+      </div>
 
       <p class="setup__label" style="margin-top:18px">🎨 থিম বেছে নাও</p>
       <div class="theme-row" id="themeRow">
