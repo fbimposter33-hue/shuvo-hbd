@@ -19,7 +19,45 @@ import { initExtras } from './extras.js';
    Receiver: opens ?to=NAME&date=YYYY-MM-DD → film plays directly
    ============================================================ */
 
-const params   = new URLSearchParams(location.search);
+/* ?z=… holds all the link settings as compact JSON → bytes → base64url.
+   Bengali letters (U+0980–09FF) take ONE byte each, so Bengali messages make very short links. */
+const packStr = (str)=>{
+  const out = [];
+  for(let i = 0; i < str.length; i++){
+    const c = str.charCodeAt(i);
+    if(c < 0x80 && c !== 1) out.push(c);
+    else if(c >= 0x980 && c <= 0x9FF) out.push(0x80 | (c - 0x980));
+    else out.push(1, c >> 8, c & 255);            // anything else: escape + UTF-16 unit
+  }
+  return Uint8Array.from(out);
+};
+const unpackStr = (bytes)=>{
+  let s = '';
+  for(let i = 0; i < bytes.length; i++){
+    const x = bytes[i];
+    if(x === 1){ s += String.fromCharCode((bytes[i + 1] << 8) | bytes[i + 2]); i += 2; }
+    else if(x >= 0x80) s += String.fromCharCode(0x980 + (x - 0x80));
+    else s += String.fromCharCode(x);
+  }
+  return s;
+};
+const b64uEnc = (str)=>{
+  const bytes = packStr(str); let bin = '';
+  for(let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+const b64uDec = (z)=> unpackStr(Uint8Array.from(atob(z.replace(/-/g, '+').replace(/_/g, '/')), ch => ch.charCodeAt(0)));
+const params = (()=>{
+  const p = new URLSearchParams(location.search), z = p.get('z');
+  if(z){
+    try{
+      const o = JSON.parse(b64uDec(z)), q = new URLSearchParams();
+      for(const k in o) if(typeof o[k] === 'string') q.set(k, o[k]);
+      if(q.has('to')) return q;
+    }catch(_){}
+  }
+  return p;      // old-style links keep working
+})();
 const urlName  = params.get('to')   || '';
 const urlDate  = params.get('date') || '';
 const urlMsg   = params.get('msg')  || '';
@@ -146,7 +184,10 @@ function buildShareURL(name, date, theme, secret, from, lock){
   if(shareDob)  p.set('dob', shareDob);
   if(filmStyle !== 'hearts') p.set('style', filmStyle);
   if(shareAlbum) p.set('album', shareAlbum);
-  return base + '?' + p.toString();
+  const plain = p.toString(), obj = {};
+  p.forEach((v, k)=>{ obj[k] = v; });
+  const packed = b64uEnc(JSON.stringify(obj));
+  return base + '?' + (packed.length + 2 < plain.length ? 'z=' + packed : plain);
 }
 
 function personalise(name, date){
@@ -262,6 +303,7 @@ function generateLink(){
   linkBox.textContent = link;
   preview.hidden = false;
   linkGenerated = true;
+  histAdd(name, link);
 
   // Save
   localStorage.setItem('hbd-name', name);
@@ -364,6 +406,92 @@ document.querySelectorAll('.tpl-btn').forEach(btn=>{
 document.getElementById('secretInput')?.addEventListener('input', (e)=>{
   if(e.target.value !== lastTpl) document.querySelectorAll('.tpl-btn').forEach(b=> b.classList.remove('active'));
 });
+
+/* --- link history (this phone only) ------------------------ */
+const HIST_KEY = 'hbd-history';
+function histLoad(){
+  try{
+    const a = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+    return Array.isArray(a) ? a.filter(x => x && typeof x.qs === 'string' && x.qs[0] === '?' && typeof x.name === 'string') : [];
+  }catch(_){ return []; }
+}
+function histSave(a){ try{ localStorage.setItem(HIST_KEY, JSON.stringify(a.slice(0, 20))); }catch(_){} }
+const histLink = (qs)=> location.origin + location.pathname + qs;
+function histAdd(name, link){
+  const i = link.indexOf('?'); if(i < 0) return;
+  const qs = link.slice(i);
+  histSave([{ name, qs, ts: Date.now() }, ...histLoad().filter(x => x.qs !== qs)]);
+  histRender();
+}
+function histRender(){
+  const box = document.getElementById('hist'), list = document.getElementById('histList');
+  if(!box || !list) return;
+  const a = histLoad();
+  box.hidden = !a.length;
+  list.textContent = '';
+  a.forEach((it)=>{
+    const row = document.createElement('div'); row.className = 'hist__row';
+    const who = document.createElement('div'); who.className = 'hist__who'; who.textContent = it.name;
+    const small = document.createElement('small');
+    try{ small.textContent = new Date(it.ts).toLocaleDateString('bn-BD', { day:'numeric', month:'long' }); }catch(_){}
+    who.append(small);
+    const mkBtn = (cls, txt, label, fn)=>{
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'hist__b' + cls; b.textContent = txt;
+      b.setAttribute('aria-label', label); b.addEventListener('click', fn); return b;
+    };
+    row.append(who,
+      mkBtn(' hist__b--wa', '💬', 'WhatsApp', ()=> window.open('https://wa.me/?text=' + encodeURIComponent(I18N[lang].share(it.name, histLink(it.qs))), '_blank')),
+      mkBtn('', '🔗', 'Copy link', (e)=>{ const b = e.currentTarget; copyText(histLink(it.qs)).then(()=>{ b.textContent = '✅'; setTimeout(()=>{ b.textContent = '🔗'; }, 1500); }); }),
+      mkBtn('', '✕', 'Delete', ()=>{ histSave(histLoad().filter(x => x.qs !== it.qs)); histRender(); }));
+    list.append(row);
+  });
+}
+if(!isViewer) histRender();
+
+/* --- draft: setup fields are kept on this phone ------------- */
+const DRAFT_KEY = 'hbd-draft';
+const DRAFT_FIELDS = { name:'nameInput', secret:'secretInput', from:'fromInput', song:'songInput', album:'albumInput', date:'bdayInput', dob:'dobInput' };
+const draftClear = document.getElementById('draftClear');
+function saveDraft(){
+  if(isViewer) return;
+  try{
+    const d = {};
+    for(const k in DRAFT_FIELDS) d[k] = document.getElementById(DRAFT_FIELDS[k])?.value || '';
+    d.lock = !!document.getElementById('lockInput')?.checked;
+    d.style = filmStyle;
+    const empty = !Object.values(d).some(v => v === true || (typeof v === 'string' && v && v !== 'hearts'));
+    if(empty) localStorage.removeItem(DRAFT_KEY); else localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+    if(draftClear) draftClear.hidden = empty;
+  }catch(_){}
+}
+function loadDraft(){
+  try{
+    const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+    if(!d || typeof d !== 'object') return;
+    for(const k in DRAFT_FIELDS){
+      const el = document.getElementById(DRAFT_FIELDS[k]);
+      if(el && typeof d[k] === 'string') el.value = d[k];
+    }
+    const lk = document.getElementById('lockInput'); if(lk) lk.checked = !!d.lock;
+    if(d.style === 'stars' || d.style === 'flowers'){
+      filmStyle = d.style;   // sprites are built later, from this value
+      document.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('active', b.dataset.style === filmStyle));
+    }
+    document.getElementById('secretInput')?.dispatchEvent(new Event('input', { bubbles: true }));
+    if(draftClear) draftClear.hidden = false;
+  }catch(_){}
+}
+if(!isViewer){
+  loadDraft();
+  let draftTimer = 0;
+  const later = ()=>{ clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 250); };
+  ['input', 'change', 'click'].forEach(ev => setupEl.addEventListener(ev, later));
+  draftClear?.addEventListener('click', ()=>{
+    if(!confirm(lang === 'en' ? 'Clear everything you wrote?' : 'সব লেখা মুছে নতুন করে শুরু করবে?')) return;
+    try{ ['hbd-draft', 'hbd-name', 'hbd-date'].forEach(k => localStorage.removeItem(k)); }catch(_){}
+    location.reload();
+  });
+}
 
 {
   const msgBox = document.getElementById('secretInput');
