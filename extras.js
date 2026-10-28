@@ -661,6 +661,94 @@ export function initExtras(ctx){
   }
 
   /* ============================================================
+     🎴 BIRTHDAY CARD — a folded card that opens
+     ============================================================ */
+  function runCard(host){
+    const wrap = el('div', 'xc-wrap');
+    const book = el('div', 'xc-book');
+    const inside = el('div', 'xc-inside');
+    const from = fromWho(), msg = message();
+    inside.append(
+      el('p', 'xc-hb', 'শুভ জন্মদিন!'),
+      el('p', 'xc-nm', name()),
+      el('p', 'xc-msg', msg || 'আজকের দিনটা তোমার মতোই সুন্দর হোক। আরও একটা দারুণ বছর শুরু হোক! 💖'),
+      el('p', 'xc-from', from ? `ভালোবাসায়, ${from} ♥` : 'অনেক ভালোবাসায় ♥'),
+      el('p', 'xc-deco', '🎈 🎂 🎁 🎈'),
+    );
+    const cover = el('button', 'xc-cover'); cover.type = 'button';
+    cover.append(el('span', 'xc-ci', '🎂'), el('span', 'xc-ct', name()), el('span', 'xc-ch', 'খুলতে ট্যাপ করো ✨'));
+    cover.addEventListener('click', () => {
+      if (book.classList.contains('open')) return;
+      book.classList.add('open');
+      api.chime(659, 0.4); api.chime(784, 0.4, 0.15); api.chime(988, 0.5, 0.3);
+      setTimeout(() => api.confetti(), 500);
+    });
+    book.append(inside, cover);
+    wrap.append(book);
+    host.append(wrap);
+  }
+
+  /* ============================================================
+     🎆 FIREWORKS — touch the sky
+     ============================================================ */
+  function runFireworks(host){
+    api.mode('dark');
+    const cv = el('canvas', 'xt-canvas');
+    const hint = el('p', 'xf-hint', 'আকাশে আঙুল ছোঁয়াও ✨');
+    host.append(cv, hint);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = host.clientWidth || window.innerWidth, H = host.clientHeight || window.innerHeight - 56;
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    const c = cv.getContext('2d');
+    c.scale(dpr, dpr);
+    let alive = true, raf = 0, parts = [], down = false, lastBurst = 0, lastAuto = performance.now();
+    const NOTES = [523, 587, 659, 784, 880, 1047];
+
+    function burst(x, y){
+      if (parts.length > 900) return;
+      const hue = rand(0, 360), n = 55 + ((Math.random() * 35) | 0);
+      for (let i = 0; i < n; i++) {
+        const a = rand(0, Math.PI * 2), sp = rand(0.8, 1) * rand(1.2, 5.2);
+        parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, dec: rand(0.009, 0.018), hue: hue + rand(-25, 25), r: rand(1.2, 2.6) });
+      }
+      api.chime(pick(NOTES), 0.25);
+    }
+    function pos(e){ const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+    const onDown = (e) => { down = true; hint.classList.add('gone'); const [x, y] = pos(e); burst(x, y); lastBurst = performance.now(); };
+    const onMove = (e) => { if (!down) return; const t = performance.now(); if (t - lastBurst < 140) return; lastBurst = t; const [x, y] = pos(e); burst(x, y); };
+    const onUp = () => { down = false; };
+    cv.addEventListener('pointerdown', onDown);
+    cv.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    cv.style.touchAction = 'none';
+
+    [250, 900, 1500].forEach((d) => setTimeout(() => { if (alive) burst(rand(W * 0.2, W * 0.8), rand(H * 0.15, H * 0.5)); }, d));
+
+    function frame(now){
+      if (!alive) return;
+      c.globalCompositeOperation = 'source-over';
+      c.fillStyle = 'rgba(8,6,30,0.24)';
+      c.fillRect(0, 0, W, H);
+      c.globalCompositeOperation = 'lighter';
+      if (now - lastAuto > 1700 && !down) { lastAuto = now; burst(rand(W * 0.15, W * 0.85), rand(H * 0.12, H * 0.55)); }
+      parts = parts.filter((p) => p.life > 0);
+      for (const p of parts) {
+        p.vy += 0.045; p.vx *= 0.985; p.vy *= 0.985;
+        p.x += p.vx; p.y += p.vy; p.life -= p.dec;
+        c.fillStyle = `hsla(${p.hue},100%,${55 + p.life * 20}%,${Math.max(0, p.life)})`;
+        c.beginPath(); c.arc(p.x, p.y, p.r * (0.5 + p.life * 0.5), 0, 6.2832); c.fill();
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      alive = false; cancelAnimationFrame(raf);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }
+
+  /* ============================================================
      POLAROIDS — photos come from public/photos/photos.json
      (or public/photos/<album>/photos.json when the link has &album=…)
      ============================================================ */
@@ -720,12 +808,14 @@ export function initExtras(ctx){
     const date = birth();
     const list = [
       { icon: '🎂', label: 'কেক',            action: () => { closeAll(); ctx.openCake(); } },
+      { icon: '🎴', label: 'জন্মদিনের কার্ড', title: '🎴 জন্মদিনের কার্ড', run: runCard },
       { icon: '🎈', label: 'বেলুন ফাটাও',    title: '🎈 বেলুন ফাটাও',    run: runBalloons },
       { icon: '🎫', label: 'স্ক্র্যাচ কার্ড', title: '🎫 স্ক্র্যাচ কার্ড', run: runScratch },
       { icon: '🎁', label: 'উপহারের বাক্স',  title: '🎁 উপহারের বাক্স',  run: runGift },
       { icon: '💗', label: 'হৃদয় ধরো',      title: '💗 হৃদয় ধরো',      run: runCatch },
       { icon: '💌', label: 'চিঠি',           title: '💌 তোমার জন্য চিঠি', run: runLetter },
       { icon: '🏮', label: 'ইচ্ছের লণ্ঠন',  title: '🏮 ইচ্ছের লণ্ঠন',   run: runLantern },
+      { icon: '🎆', label: 'আতশবাজি',        title: '🎆 আতশবাজি',        run: runFireworks },
       { icon: '✨', label: 'নামের তারা',     title: '✨ নামের তারামণ্ডল', run: runStars },
       { icon: '📅', label: 'তুমি এতদিন',     title: '📅 তুমি এতদিন',     run: runAlive,
         off: info ? '' : 'জন্মতারিখ (সালসহ, অন্তত ১ বছর আগের) দিলে এটা দেখা যাবে' },
