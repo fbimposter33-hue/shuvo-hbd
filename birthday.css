@@ -1148,3 +1148,7 @@ body.hub-on .cake-open, body.hub-on .x-fab{ display:none !important; }
   display:block; margin:16px auto 0; padding:8px 14px; border:0; background:none; cursor:pointer;
   font:500 13.5px "Hind Siliguri",system-ui,sans-serif; color:#b07a8c; text-decoration:underline;
 }
+
+/* visitor number inside the credit pill */
+.dev-views{ margin-left:8px; color:#8a4a5a; font-weight:500; }
+.dev-views[hidden]{ display:none; }
