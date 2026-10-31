@@ -12,6 +12,7 @@
 
 import gsap from 'gsap';
 import { initExtras } from './extras.js';
+import { initAnalytics } from './analytics.js';
 
 /* ============================================================
    URL-BASED PERSONALISATION
@@ -1889,3 +1890,6 @@ if (isRecord){
     replay(){ resetAll(); },
   };
 }
+
+/* visitor statistics (off until the IDs in analytics.js are filled in) */
+if(!isRecord) initAnalytics();
